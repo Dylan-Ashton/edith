@@ -1,5 +1,6 @@
 // Write <-> Markdown on generated documents of about 1,000, 14,000 and 50,000 words: the outline and the text survive
-// the round trip, and the switch times are printed (no thresholds: CI machines vary too much).
+// the round trip, closing the tab straight after a switch is clean, and the switch times are printed (no thresholds:
+// CI machines vary too much).
 import { chromium } from 'playwright';
 import { filler } from './filler.mjs';
 const ok = (n, v) => console.log((v ? 'PASS ' : 'FAIL ') + n);
@@ -30,9 +31,11 @@ for (const words of [1000, 14000, 50000]) {
   ok(`${words}: outline unchanged back in Write`, JSON.stringify(await outline()) === JSON.stringify(before));
   const toMd2 = await sw('markdown'); await p.waitForTimeout(800);
   ok(`${words}: Markdown text is the same after a round trip`, (await mdText()) === text1);
-  await sw('wysiwyg'); await p.waitForTimeout(800);
+  // close the tab straight after a switch: the change it triggers is still pending (up to 1.8 s on long documents)
+  // and must not run once the tab is gone
+  await sw('wysiwyg'); await p.keyboard.press('Meta+W'); await p.waitForTimeout(2500);
   console.log(`  ${count}: Write -> Markdown ${toMd} ms, ${toMd2} ms; Markdown -> Write ${toWw} ms`);
-  await p.keyboard.press('Meta+W'); await p.waitForTimeout(500);
+  ok(`${words}: closing right after a switch leaves nothing running`, errs.length === 0);
 }
 ok('no page errors', errs.length === 0); if (errs.length) console.log(errs);
 await b.close();

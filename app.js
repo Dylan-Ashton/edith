@@ -750,6 +750,11 @@
         }
       }
     }
+    // a closed tab's pending change, draft and version timers would otherwise run against the next tab, or none
+    Object.keys(tab.timers).forEach((k) => {
+      clearTimeout(tab.timers[k]);
+      tab.timers[k] = null;
+    });
     const i = tabs.indexOf(tab);
     tabs.splice(i, 1);
     try {

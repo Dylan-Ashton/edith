@@ -33,7 +33,7 @@
       return false;
     }
   }
-  const APP_VERSION = "3.7.3";
+  const APP_VERSION = "3.7.4";
   const DEFAULTS = {
     width: "normal",
     seenVersion: "",

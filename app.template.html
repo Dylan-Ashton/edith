@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edith</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src __CSP_SCRIPT_HASHES__; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src https://api.github.com; worker-src blob:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<style>/*__INLINE_FONTS:fonts/fonts.list__*/</style>
+<style>
+/*__INLINE_CSS:node_modules/@toast-ui/editor/dist/toastui-editor.css__*/
+</style>
+<style>
+  /* ================= Theme tokens ================= */
+  :root {
+    --bg: #e9e0cc; --surface: #faf7ef; --surface-2: #f1e9d8; --line: #dcd2bc;
+    --ink: #3e372e; --ink-2: #6f6556; --ink-3: #9c917e;
+    --accent: #5e8a68; --accent-soft: #e0eadd; --accent-ink: #ffffff; --brand: #c9a227;
+    --warn: #b7651a; --note: #cfe0cd; --note-ink: #2c3f31;
+    --code-bg: #efe8d6; --sel: #d7e6d6;
+    --ui-font: "IBM Plex Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+    --doc-font: "IBM Plex Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --doc-size: 16px; --doc-lh: 1.65; --doc-width: 82ch;
+    --radius: 8px; --glow: none;
+    --side: 260px; --mdsplit: 50%;
+  }
+  [data-theme="dusk"] {
+    --bg: #2f2a25; --surface: #3a352e; --surface-2: #332e28; --line: #544e44;
+    --ink: #ece4d2; --ink-2: #b4a994; --ink-3: #847a69;
+    --accent: #8eb092; --accent-soft: #3f4a3f; --accent-ink: #1d2a1f; --brand: #d9b54a;
+    --warn: #e3a35a; --note: #4a5a48; --note-ink: #dcebd8;
+    --code-bg: #2c2822; --sel: #4a5a48;
+  }
+  [data-theme="natural"] {
+    --bg: #ece6d8; --surface: #faf6ee; --surface-2: #f1ebdf; --line: #d8cfbc;
+    --ink: #2a2722; --ink-2: #5c554a; --ink-3: #94897a;
+    --accent: #5f7a3d; --accent-soft: #e4ead6; --warn: #a8622b; --note: #efd9a0; --note-ink: #4a3509;
+    --code-bg: #efe9dc; --sel: #dde4cb;
+    --ui-font: "Nunito Sans", -apple-system, sans-serif; --doc-font: "Lora", Georgia, serif; --doc-lh: 1.75; --radius: 10px;
+  }
+  [data-theme="organic"] {
+    --bg: #171c17; --surface: #1f261f; --surface-2: #273027; --line: #3a463a;
+    --ink: #e8e3d6; --ink-2: #b4b0a3; --ink-3: #7b8277;
+    --accent: #a3c47c; --accent-soft: #2f3f28; --accent-ink: #15200f; --warn: #e3a35a; --note: #5a4d1f; --note-ink: #f1e2a8;
+    --code-bg: #2a332a; --sel: #3d5234;
+    --ui-font: "Work Sans", -apple-system, sans-serif; --doc-font: "Fraunces", Georgia, serif; --doc-lh: 1.7; --radius: 12px;
+  }
+  [data-theme="academic"] {
+    --bg: #e9e6dd; --surface: #fbfaf5; --surface-2: #f2f0e8; --line: #d2cfc3;
+    --ink: #1f2430; --ink-2: #4a4f5c; --ink-3: #8b8f98;
+    --accent: #7a2e2e; --accent-soft: #f0e0e0; --warn: #8a5a1a; --note: #f6e3a6; --note-ink: #4a3a00;
+    --code-bg: #efede4; --sel: #e6d4cf;
+    --ui-font: "Source Sans 3", -apple-system, sans-serif; --doc-font: "EB Garamond", Garamond, Georgia, serif;
+    --doc-size: 18px; --doc-lh: 1.6; --doc-width: 76ch; --radius: 3px;
+  }
+  [data-theme="focused"] {
+    --bg: #2a2a2a; --surface: #303030; --surface-2: #363636; --line: #444;
+    --ink: #d8d8d8; --ink-2: #9a9a9a; --ink-3: #666;
+    --accent: #bdbdbd; --accent-soft: #3f3f3f; --accent-ink: #1a1a1a; --warn: #c9a26a; --note: #4a4a3a; --note-ink: #e6dcb0;
+    --code-bg: #262626; --sel: #4a4a4a;
+    --ui-font: "Inter", -apple-system, sans-serif; --doc-font: "Inter", -apple-system, sans-serif; --doc-lh: 1.8; --doc-width: 72ch; --radius: 6px;
+  }
+  [data-theme="matrix"] {
+    --bg: #000; --surface: #040804; --surface-2: #0a140a; --line: #0f3a14;
+    --ink: #4dff7a; --ink-2: #2fbf58; --ink-3: #1d7a38;
+    --accent: #00ff6a; --accent-soft: #052e12; --accent-ink: #001a08; --warn: #ffd166; --note: #0b2b14; --note-ink: #b6ffcb;
+    --code-bg: #061206; --sel: #0d4a21;
+    --ui-font: "Share Tech Mono", "SF Mono", monospace; --mono: "Share Tech Mono", "SF Mono", monospace; --doc-font: "Share Tech Mono", "SF Mono", monospace;
+    --doc-lh: 1.6; --radius: 0px; --glow: 0 0 6px rgba(0,255,106,.45);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: var(--ui-font); font-size: 14px; color: var(--ink); background: var(--bg);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; text-shadow: inherit; }
+  input, textarea, select { font: inherit; color: var(--ink); }
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  /* ================= Top bar ================= */
+  .topbar {
+    height: 48px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 10px;
+    background: var(--surface); border-bottom: 1px solid var(--line); -webkit-app-region: drag;
+  }
+  .topbar button, .topbar input, .topbar .menu, .topbar .seg { -webkit-app-region: no-drag; }
+  ::highlight(edith-find) { background: var(--note, #CFE0CD); color: var(--note-ink, inherit); }
+  .topbar > * { flex: none; }
+  .topbar > .spacer { flex: 1 1 0; min-width: 0; }
+  .filename { display: flex; align-items: baseline; gap: 8px; min-width: 0; margin-right: 6px; }
+  .filename input { font-weight: 500; font-size: 15px; background: transparent; border: 0; border-bottom: 1px solid transparent; padding: 2px 0; width: 13ch; max-width: 280px; }
+  .filename input:focus { outline: 0; border-bottom-color: var(--accent); }
+  .filename .dirty { color: var(--brand); font-size: 12px; visibility: hidden; white-space: nowrap; }
+  .filename .dirty.on { visibility: visible; }
+  .tb-btn {
+    height: 30px; min-width: 30px; padding: 0 8px; border-radius: var(--radius);
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px; color: var(--ink-2); font-size: 13px; white-space: nowrap;
+  }
+  .tb-btn:hover { background: var(--surface-2); color: var(--ink); }
+  .tb-btn.active { background: var(--accent-soft); color: var(--accent); }
+  .tb-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tb-btn b { font-family: var(--mono); font-weight: 500; font-size: 13px; }
+  .tb-btn i { font-family: var(--mono); font-size: 13px; }
+  .tb-btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .tb-btn.primary:hover { filter: brightness(1.1); }
+  .sep { width: 1px; height: 18px; background: var(--line); margin: 0 4px; flex: none; opacity: .8; }
+  .spacer { flex: 1; }
+  .seg { display: inline-flex; background: var(--surface-2); border-radius: var(--radius); padding: 2px; }
+  .seg .tb-btn { height: 26px; }
+  .seg .tb-btn.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+
+  /* dropdown menus */
+  .menu-wrap { position: relative; }
+  .menu {
+    position: absolute; top: 34px; left: 0; z-index: 40; min-width: 210px; padding: 6px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  }
+  .menu.right { left: auto; right: 0; }
+  .menu { min-width: 250px; }
+  .menu button { display: flex; width: 100%; align-items: center; flex-wrap: wrap; gap: 0 10px; text-align: left; padding: 7px 10px; border-radius: calc(var(--radius) - 2px); font-size: 13px; color: var(--ink); white-space: nowrap; }
+  .menu button:hover { background: var(--surface-2); }
+  .menu button .k { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .menu button .sw { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); flex: none; }
+  .menu button.on { background: var(--accent-soft); color: var(--accent); }
+  .menu .mh { font-size: 11px; color: var(--ink-3); padding: 6px 10px 2px; }
+  .menu .mdiv { height: 1px; background: var(--line); margin: 5px 4px; }
+  .menu .sub { font-size: 11.5px; color: var(--ink-3); flex-basis: 100%; white-space: normal; margin-top: 1px; }
+  .menu button.theme { display: grid; grid-template-columns: 36px 1fr; column-gap: 10px; align-items: center; }
+  .menu button.theme .theme-prev { grid-row: 1 / 3; }
+  .menu button.theme .sub { flex-basis: auto; margin: 0; }
+
+  /* ================= Workspace ================= */
+  .work { flex: 1; min-height: 0; display: flex; }
+  .side { width: var(--side); flex: none; background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-width: 0; }
+  .work.no-side .side, .work.no-side .gutter { display: none; }
+  .gutter { width: 6px; flex: none; cursor: col-resize; background: transparent; position: relative; margin-left: -3px; margin-right: -3px; z-index: 5; }
+  .gutter:hover, .gutter.drag { background: var(--accent); opacity: .5; }
+  .tabs { display: flex; border-bottom: 1px solid var(--line); padding: 6px 6px 0; gap: 2px; }
+  .tabs button { flex: 1; padding: 7px 0 8px; font-size: 12.5px; color: var(--ink-3); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs button.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .tabs button .n { font-family: var(--mono); font-size: 10px; margin-left: 4px; color: var(--ink-3); }
+  .panel { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; display: none; }
+  .panel.active { display: block; }
+  .panel-empty { padding: 14px 10px; font-size: 13px; color: var(--ink-3); line-height: 1.5; }
+  .panel-actions { display: flex; gap: 6px; padding: 4px 4px 10px; }
+  .panel-actions .tb-btn { font-size: 12px; height: 26px; border: 1px solid var(--line); }
+
+  /* outline */
+  .ol-item { display: block; width: 100%; text-align: left; padding: 5px 8px; border-radius: 5px; font-size: 13px; line-height: 1.35; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ol-item:hover { background: var(--surface-2); color: var(--ink); }
+  .ol-item.current { background: var(--accent-soft); color: var(--accent); }
+  .ol-item.l1 { font-weight: 600; color: var(--ink); margin-top: 6px; }
+  .ol-item.l2 { padding-left: 16px; }
+  .ol-item.l3 { padding-left: 28px; font-size: 12.5px; }
+  .ol-item.l4, .ol-item.l5, .ol-item.l6 { padding-left: 40px; font-size: 12px; color: var(--ink-3); }
+
+  /* notes */
+  .note-card { border: 1px solid var(--line); border-left: 3px solid var(--note); border-radius: var(--radius); padding: 8px 10px; margin: 0 2px 8px; background: var(--surface); }
+  .note-card.done { opacity: .55; border-left-color: var(--ink-3); }
+  .note-card .q { font-size: 12px; color: var(--ink-3); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  .note-card .q:hover { color: var(--accent); }
+  .note-card .t { font-size: 13px; line-height: 1.45; margin: 4px 0 6px; white-space: pre-wrap; }
+  .note-card .m { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--ink-3); }
+  .note-card .m button { color: var(--ink-3); font-size: 11px; }
+  .note-card .m button:hover { color: var(--accent); }
+  .note-card .m .r { margin-left: auto; }
+
+  /* history */
+  .ver { display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: var(--radius); margin-bottom: 2px; }
+  .ver:hover { background: var(--surface-2); }
+  .ver .l { font-size: 13px; }
+  .ver .d { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .ver .tag { font-size: 10.5px; padding: 1px 6px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); margin-left: 6px; }
+  .ver-day { font-size: 11px; color: var(--ink-3); padding: 10px 10px 4px; }
+
+  /* editor host */
+  .editor-host { flex: 1; min-width: 0; background: var(--surface); position: relative; }
+
+  /* ================= Toast UI overrides ================= */
+  .toastui-editor-defaultUI { border: 0 !important; height: 100% !important; background: var(--surface); }
+  .toastui-editor-defaultUI .toastui-editor-toolbar, .toastui-editor-mode-switch { display: none !important; }
+  .toastui-editor-main { height: 100% !important; }
+  .toastui-editor-main-container, .toastui-editor-md-container, .toastui-editor-ww-container, .toastui-editor-md-preview, .toastui-editor-defaultUI .ProseMirror { background: var(--surface) !important; color: var(--ink) !important; }
+  .toastui-editor-md-container { position: relative; }
+  .toastui-editor-main .toastui-editor-md-vertical-style .toastui-editor { width: var(--mdsplit) !important; }
+  .toastui-editor-main .toastui-editor-md-vertical-style .toastui-editor-md-preview { width: calc(100% - var(--mdsplit)) !important; border-left: 1px solid var(--line); background: var(--surface-2) !important; }
+  .toastui-editor-main .toastui-editor-md-splitter { display: none !important; }
+  .work.md-nopreview { --mdsplit: 100%; }
+  .work.md-nopreview .toastui-editor-md-preview, .work.md-nopreview .md-gutter { display: none !important; }
+  .md-gutter { position: absolute; top: 0; bottom: 0; left: var(--mdsplit); width: 8px; margin-left: -4px; cursor: col-resize; z-index: 30; }
+  .md-gutter:hover, .md-gutter.drag { background: var(--accent); opacity: .5; }
+
+  .toastui-editor-defaultUI .ProseMirror { font-family: var(--mono); font-size: calc(var(--doc-size) - 1px); line-height: 1.65; padding: 24px 24px 50vh !important; color: var(--ink) !important; }
+  .toastui-editor-md-container .toastui-editor-md-code-block-line-background, .toastui-editor-md-container .toastui-editor-md-custom-block-line-background { background: var(--code-bg) !important; }
+  .toastui-editor-md-container .toastui-editor-md-heading { color: var(--ink); font-weight: 600; }
+  .toastui-editor-md-container .toastui-editor-md-heading.toastui-editor-md-heading1 { font-size: 1.3em; }
+  .toastui-editor-md-container .toastui-editor-md-delimiter, .toastui-editor-md-container .toastui-editor-md-thematic-break, .toastui-editor-md-container .toastui-editor-md-meta { color: var(--ink-3) !important; }
+  .toastui-editor-md-container .toastui-editor-md-list-item-style, .toastui-editor-md-container .toastui-editor-md-block-quote { color: var(--accent) !important; }
+  .toastui-editor-md-container .toastui-editor-md-code, .toastui-editor-md-container .toastui-editor-md-code-block { color: var(--accent) !important; background: var(--code-bg); }
+  .toastui-editor-md-container .toastui-editor-md-link-desc, .toastui-editor-md-container .toastui-editor-md-link { color: var(--accent) !important; }
+  .toastui-editor-md-container .toastui-editor-md-link-url { color: var(--ink-3) !important; }
+  .toastui-editor-md-container .toastui-editor-md-marked-text, .toastui-editor-md-container .toastui-editor-md-html { color: var(--ink-2) !important; }
+  .toastui-editor-md-container .toastui-editor-md-strong { font-weight: 600; } .toastui-editor-md-container .toastui-editor-md-emph { font-style: italic; }
+  .toastui-editor-md-container .toastui-editor-md-table, .toastui-editor-md-container .toastui-editor-md-table-cell { color: var(--ink) !important; }
+  .toastui-editor-defaultUI .ProseMirror ::selection { background: var(--sel); }
+  .toastui-editor-defaultUI .ProseMirror-selectednode { outline: 2px solid var(--accent); }
+  .ProseMirror .placeholder { color: var(--ink-3) !important; }
+
+  /* document (WYSIWYG + preview) typography */
+  .toastui-editor-contents { font-family: var(--doc-font) !important; font-size: var(--doc-size) !important; line-height: var(--doc-lh) !important; color: var(--ink) !important; margin: 0 !important; }
+  .toastui-editor-ww-container .toastui-editor-contents { padding: 32px max(40px, calc((100% - var(--doc-width)) / 2)) 50vh !important; }
+  .toastui-editor-md-preview .toastui-editor-contents { padding: 24px max(28px, calc((100% - var(--doc-width)) / 2)) 50vh !important; }
+  .toastui-editor-defaultUI .toastui-editor-md-container .toastui-editor .ProseMirror { padding: 24px max(24px, calc((100% - var(--doc-width)) / 2)) 50vh !important; }
+  .work.w-wide { --doc-width: 110ch; } .work.w-full { --doc-width: 100%; }
+  .toastui-editor-contents p { color: var(--ink) !important; margin: 0 0 .8em !important; }
+  .toastui-editor-ww-container .toastui-editor-contents p { margin: 0 0 .8em !important; }
+  .toastui-editor-contents h1, .toastui-editor-contents h2, .toastui-editor-contents h3, .toastui-editor-contents h4, .toastui-editor-contents h5, .toastui-editor-contents h6 { color: var(--ink) !important; font-family: var(--doc-font); font-weight: 600 !important; line-height: 1.25 !important; margin: 1.5em 0 .5em !important; border: 0 !important; padding: 0 !important; }
+  .toastui-editor-contents h1 { font-size: 1.9em !important; letter-spacing: -.01em; }
+  .toastui-editor-contents h2 { font-size: 1.45em !important; border-bottom: 1px solid var(--line) !important; padding-bottom: .2em !important; }
+  .toastui-editor-contents h3 { font-size: 1.18em !important; }
+  .toastui-editor-contents h4 { font-size: 1em !important; color: var(--ink-2) !important; }
+  .toastui-editor-contents > div > div:first-of-type h1, .toastui-editor-contents h1:first-child { margin-top: 0 !important; }
+  .toastui-editor-contents a { color: var(--accent) !important; }
+  .toastui-editor-contents strong { color: inherit !important; }
+  .toastui-editor-contents blockquote { border-left: 3px solid var(--accent) !important; color: var(--ink-2) !important; margin: 0 0 1em !important; padding: .2em 1em !important; }
+  .toastui-editor-contents blockquote p { color: var(--ink-2) !important; }
+  .toastui-editor-contents code { font-family: var(--mono) !important; background: var(--code-bg) !important; color: var(--accent) !important; font-size: .88em !important; padding: .1em .35em !important; border-radius: 4px; }
+  .toastui-editor-contents pre { background: var(--code-bg) !important; border-radius: var(--radius); padding: 14px 16px !important; margin: 0 0 1.2em !important; }
+  .toastui-editor-contents pre code { color: var(--ink) !important; background: none !important; padding: 0 !important; font-size: .85em !important; }
+  .toastui-editor-contents ul, .toastui-editor-contents ol { color: var(--ink) !important; margin: 0 0 1em !important; padding-left: 1.6em !important; }
+  .toastui-editor-contents li { margin: .2em 0 !important; color: var(--ink) !important; }
+  .toastui-editor-contents ul > li:not(.task-list-item)::before { background: var(--ink-2) !important; margin-top: calc(var(--doc-lh) * .5em - 3px) !important; }
+  .toastui-editor-contents .task-list-item::before { margin-top: calc(var(--doc-lh) * .5em - 9px) !important; }
+  .toastui-editor-contents ol > li::before { color: var(--ink-2) !important; }
+  .toastui-editor-contents table { border-collapse: collapse; margin: 0 0 1.2em !important; }
+  .toastui-editor-contents table th, .toastui-editor-contents table td { border: 1px solid var(--line) !important; color: var(--ink) !important; padding: 6px 12px !important; }
+  .toastui-editor-contents table th { background: var(--surface-2) !important; font-weight: 600 !important; }
+  .toastui-editor-contents th p, .toastui-editor-contents td p { color: inherit !important; margin: 0 !important; }
+  .toastui-editor-contents hr { border-top: 1px solid var(--line) !important; margin: 2em 0 !important; }
+  .toastui-editor-contents img { max-width: 100%; border-radius: var(--radius); }
+  .toastui-editor-contents img.img-web { vertical-align: middle; border-radius: 0; } /* placeholder for a picture from the web, which Edith never loads */
+  .toastui-editor-contents .task-list-item::before { border-color: var(--ink-3) !important; background-color: transparent !important; }
+  .toastui-editor-contents .task-list-item.checked::before { background-color: var(--accent) !important; border-color: var(--accent) !important; }
+  .toastui-editor-contents del { color: var(--ink-3) !important; }
+  .toastui-editor-contents .toastui-editor-md-preview-highlight { background: var(--accent-soft) !important; }
+  .toastui-editor-contents .toastui-editor-md-preview-highlight::after { display: none; }
+  .toastui-editor-contents .toastui-editor-ww-code-block:after { color: var(--ink-3); font-family: var(--ui-font); }
+  .toastui-editor-ww-code-block-language { background: var(--surface) !important; color: var(--ink) !important; border-color: var(--line) !important; }
+  .toastui-editor-ww-code-block-language input { color: var(--ink) !important; background: var(--surface) !important; }
+  .toastui-editor-tooltip { display: none !important; }
+  .toastui-editor-context-menu { background: var(--surface) !important; color: var(--ink) !important; border-color: var(--line) !important; }
+  .toastui-editor-context-menu .menu-item:hover { background: var(--surface-2) !important; }
+  .toastui-editor-contents td.toastui-editor-cell-selected, .toastui-editor-contents th.toastui-editor-cell-selected { background: var(--sel) !important; }
+  .toastui-editor-ww-container .toastui-editor-contents .mark-note, .toastui-editor-md-preview .mark-note { background: var(--note); color: var(--note-ink); }
+
+  /* ================= Status bar ================= */
+  .status { height: 28px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 12px; background: var(--surface); border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .status .msg { color: var(--ink-2); }
+  .status .msg.saved { color: var(--accent); }
+  .status .msg.err { color: var(--warn); }
+  .status button { color: var(--ink-3); }
+  .status button:hover { color: var(--ink); }
+  .status button.on { color: var(--accent); }
+
+  /* ================= Find bar ================= */
+  .findbar { display: none; align-items: center; gap: 6px; padding: 6px 10px; background: var(--surface-2); border-bottom: 1px solid var(--line); flex: none; }
+  .findbar.on { display: flex; }
+  .findbar input { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 8px; font-size: 13px; width: 200px; font-family: var(--mono); }
+  .findbar .cnt { font-size: 12px; color: var(--ink-3); min-width: 60px; font-variant-numeric: tabular-nums; }
+  .findbar .tb-btn { height: 26px; font-size: 12px; border: 1px solid var(--line); background: var(--surface); }
+
+  /* ================= Overlays ================= */
+  .drop { position: fixed; inset: 0; display: none; background: var(--accent-soft); opacity: .95; align-items: center; justify-content: center; font-size: 20px; color: var(--accent); z-index: 50; border: 3px dashed var(--accent); }
+  .drop.on { display: flex; }
+  .modal { position: fixed; inset: 0; display: none; z-index: 60; background: rgba(10,14,18,.5); align-items: center; justify-content: center; }
+  .modal.on { display: flex; }
+  .card { background: var(--surface); color: var(--ink); border-radius: calc(var(--radius) + 4px); width: min(540px, 92vw); max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.35); border: 1px solid var(--line); }
+  .card.wide { width: min(980px, 94vw); }
+  .card-h { padding: 16px 22px 10px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .card-h .sub { font-weight: 400; font-size: 12.5px; color: var(--ink-3); }
+  .card-b { padding: 4px 22px 18px; overflow: auto; flex: 1; min-height: 0; }
+  .card-f { padding: 10px 22px 16px; display: flex; gap: 8px; justify-content: flex-end; }
+  .card-f .tb-btn { border: 1px solid var(--line); }
+  .card-f .tb-btn.primary { border-color: transparent; }
+  .card-f .tb-btn.danger { color: var(--warn); margin-right: auto; }
+  .card textarea, .card input[type=text], .card input[type=url] { width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; font-size: 14px; }
+  .card textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
+  .card label { display: block; font-size: 12px; color: var(--ink-3); margin: 10px 0 4px; }
+  .card .quote { font-size: 13px; color: var(--ink-2); font-style: italic; background: var(--surface-2); border-left: 3px solid var(--note); padding: 6px 10px; border-radius: 4px; max-height: 80px; overflow: auto; }
+  .card table.k { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .card table.k td { padding: 5px 0; border-bottom: 1px solid var(--line); }
+  .card table.k td:last-child { text-align: right; font-family: var(--mono); color: var(--ink-2); white-space: nowrap; }
+  .card p { font-size: 13px; color: var(--ink-2); line-height: 1.55; margin: 10px 0 0; }
+  .card h3 { font-size: 13px; margin: 16px 0 6px; color: var(--ink); }
+  .diff { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; background: var(--surface-2); }
+  .progress { height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+  .progress i { display: block; height: 100%; width: 30%; background: var(--accent); animation: slide 1.1s infinite ease-in-out; }
+  @keyframes slide { from { transform: translateX(-100%);} to { transform: translateX(400%);} }
+  @media (prefers-reduced-motion: reduce) { .progress i { animation: none; width: 100%; } }
+  ::-webkit-scrollbar { width: 11px; height: 11px; } ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; border: 3px solid var(--surface); } ::-webkit-scrollbar-thumb:hover { background: var(--ink-3); } ::-webkit-scrollbar-track { background: transparent; }
+  .toastui-editor-contents a:hover { text-decoration: underline; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: no-preference) {
+    .tb-btn { transition: background .12s, color .12s; }
+    .menu:not([hidden]) { animation: fadeIn .14s ease-out; }
+    .modal.on .card { animation: cardIn .18s ease-out; }
+    .bubble:not([hidden]) { animation: fadeIn .12s ease-out; }
+    .tab { transition: background .15s ease, color .15s ease, transform .15s ease; }
+    .start:not([hidden]) .start-card { animation: cardIn .25s ease-out; }
+  }
+  .recent-row { display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .recent-row .d { color: var(--ink-3); font-size: 12px; margin-left: auto; white-space: nowrap; }
+  .recent-row button.open { color: var(--accent); }
+  .theme-prev { display: inline-block; width: 36px; height: 22px; border-radius: 4px; border: 1px solid var(--line); flex: none; position: relative; overflow: hidden; }
+  .theme-prev::after { content: ""; position: absolute; left: 6px; right: 6px; top: 6px; height: 3px; border-radius: 2px; background: var(--p-accent); }
+  .theme-prev::before { content: ""; position: absolute; left: 6px; right: 14px; top: 12px; height: 3px; border-radius: 2px; background: var(--p-ink); opacity: .5; }
+
+  .wordmark { font-weight: 600; font-size: 16px; letter-spacing: -.01em; color: var(--ink); margin: 0 10px 0 2px; position: relative; user-select: none; }
+  .wordmark .i { position: relative; }
+  body.native .wordmark { display: none; }
+  .tabstrip { display: flex; align-items: stretch; height: 40px; flex: none; background: var(--surface-2); border-bottom: 1px solid var(--line); padding: 0 6px; }
+  .topbar { background: var(--surface); }
+  .tabs-scroll { display: flex; align-items: stretch; flex: 0 1 auto; min-width: 0; max-width: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+  .tabs-scroll::-webkit-scrollbar { display: none; }
+  .tab { display: flex; align-items: center; gap: 6px; padding: 0 8px 0 12px; margin: 7px 2px 0 0; border-radius: var(--radius) var(--radius) 0 0; color: var(--ink-2); font-size: 12.5px; max-width: 220px; min-width: 90px; cursor: default; border: 1px solid transparent; border-bottom: 0; user-select: none; position: relative; }
+  .tab .n { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tab .d { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); flex: none; display: none; }
+  .tab.dirty .d { display: block; }
+  .tab .x { width: 18px; height: 18px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-3); font-size: 14px; line-height: 1; opacity: 0; flex: none; }
+  .tab:hover .x, .tab.active .x { opacity: 1; }
+  .tab .x:hover { background: var(--line); color: var(--ink); }
+  .tab.dirty:not(:hover) .x { opacity: 0; }
+  .tab.dirty:hover .d { display: none; }
+  .tab:not(.active):hover { background: color-mix(in srgb, var(--ink) 7%, var(--surface-2)); color: var(--ink); transform: translateY(-1px); }
+  .tab.active { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .tab.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--surface); }
+  .tab.dragging { opacity: .5; }
+  .tab-add { width: 30px; margin: 7px 0 3px 4px; border-radius: var(--radius); color: var(--ink-3); font-size: 18px; }
+  .tab-add:hover { background: var(--surface-2); color: var(--ink); }
+  /* The editor area is capped and centered, so a Markdown split (text | preview) centers as one block; Write stays centered inside it */
+  .tabview { position: absolute; top: 0; bottom: 0; left: 0; right: 0; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; }
+  .tabview[hidden] { display: none !important; }
+  .tabview > div { flex: 1; min-height: 0; }
+  .topbar.c1 [data-pri="1"], .topbar.c2 [data-pri="1"], .topbar.c2 [data-pri="2"], .topbar.c3 [data-pri="1"], .topbar.c3 [data-pri="2"], .topbar.c3 [data-pri="3"] { display: none !important; }
+  .topbar .filename { flex: 0 1 auto; min-width: 70px; overflow: hidden; }
+  .topbar .filename input { width: 100%; max-width: 240px; min-width: 60px; text-overflow: ellipsis; }
+  .topbar.c2 .dirty, .topbar.c3 .dirty { display: none; }
+  .topbar.c3 .filename input { max-width: 120px; }
+  .diff.full { user-select: text; }
+  .d-add { background: rgba(80,180,100,.22); } .d-del { background: rgba(220,80,80,.22); text-decoration: line-through; opacity: .85; }
+  .d-ctx { opacity: .6; }
+  .d-skip { color: var(--ink-3); display: block; padding: 4px 0; font-style: italic; }
+  .card-h .seg .tb-btn { font-size: 12px; height: 24px; }
+  .status #btnZoom { font-variant-numeric: tabular-nums; }
+  .menu.up { top: auto; bottom: 30px; }
+  .zoomrow { display: flex; align-items: center; justify-content: space-between; padding: 2px 6px; }
+  .zoomrow button { width: 32px; height: 28px; border-radius: 6px; font-size: 16px; }
+  .zoomrow button:hover { background: var(--surface-2); }
+  .zoomrow span { font-variant-numeric: tabular-nums; font-size: 13px; }
+  body.focus .side, body.focus .gutter, body.focus .tabstrip, body.focus .status, body.focus .topbar { display: none !important; }
+  body.focus .work { height: 100vh; }
+  .start { position: absolute; inset: 0; z-index: 10; display: flex; align-items: flex-start; justify-content: center; overflow: auto; padding: 7vh 32px 40px; background: var(--surface); }
+  .start-logo { display: block; margin: 0 auto 22px; border-radius: 27px; box-shadow: 0 12px 32px rgba(60,50,30,.18); }
+  .recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .rcard { text-align: left; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; transition: transform .12s, box-shadow .12s; }
+  .rcard:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(60,50,30,.12); border-color: var(--accent-soft); }
+  .rcard .thumb { height: 118px; background: var(--surface-2); padding: 14px 14px 0; overflow: hidden; position: relative; }
+  .rcard .thumb::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(transparent, var(--surface-2)); }
+  .rcard .thumb b { display: block; font-size: 11px; color: var(--ink); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rcard .thumb p { margin: 0; font-size: 8.5px; line-height: 1.5; color: var(--ink-2); }
+  .rcard .meta { padding: 10px 12px 11px; }
+  .rcard .meta .n { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rcard .meta .d { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+  .start .hint { margin-top: 28px; }
+  .start[hidden] { display: none !important; }
+  body.home .tabview { visibility: hidden; }
+  .start-card { width: min(860px, 100%); text-align: center; }
+  .start h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -.01em; }
+  .start p.lead { color: var(--ink-2); margin: 0 auto 26px; font-size: 15px; line-height: 1.55; max-width: 480px; }
+  .notes-bar { padding: 4px 2px 10px; }
+  .notes-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .notes-row .copy-prompt { margin-left: auto; height: 26px; font-size: 12px; padding: 0 9px; }
+  .start .actions { display: flex; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center; }
+  .start .actions .tb-btn { border: 1px solid var(--line); height: 42px; padding: 0 18px; font-size: 14px; flex-direction: column; gap: 0; line-height: 1.15; }
+  .start .actions .tb-btn .sub { font-size: 10.5px; color: var(--ink-3); font-weight: 400; }
+  .start h2 { text-align: left; }
+  .start .recent-grid { text-align: left; }
+  .tab-home { width: 32px; margin: 7px 2px 3px 0; border-radius: var(--radius); color: var(--ink-3); display: inline-flex; align-items: center; justify-content: center; }
+  .tab-home svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linejoin: round; }
+  .tab-home:hover, .tab-home.active { background: var(--surface); color: var(--ink); }
+  body.home .tabstrip .tab.active { background: transparent; color: var(--ink-2); border-color: transparent; }
+  body.home .tabstrip .tab.active::after { display: none; }
+  .start .actions .tb-btn.primary { border-color: transparent; }
+  .start h2 { font-size: 12px; color: var(--ink-3); font-weight: 500; margin: 0 0 6px; }
+  .start .recent-row { padding: 9px 6px; }
+  .start .hint { font-size: 12.5px; color: var(--ink-3); margin-top: 18px; line-height: 1.5; }
+  .bubble { position: fixed; z-index: 45; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; font-size: 12.5px; background: var(--ink); color: var(--surface); border-radius: 20px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  .bubble svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .ctx { position: fixed; z-index: 46; min-width: 190px; padding: 5px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,.2); }
+  .ctx button { display: block; width: 100%; text-align: left; padding: 7px 10px; border-radius: 4px; font-size: 13px; }
+  .ctx button:hover { background: var(--surface-2); }
+  .note-mark { background: var(--note); color: var(--note-ink); border-bottom: 2px solid rgba(0,0,0,.25); cursor: pointer; border-radius: 2px; padding: 1px 0; }
+  .note-mark.focus, .note-mark:hover { filter: brightness(.92); }
+  @keyframes notepulse { 0% { box-shadow: 0 0 0 0 rgba(94,138,104,.55); } 100% { box-shadow: 0 0 0 10px rgba(94,138,104,0); } }
+  .note-mark.pulse { animation: notepulse .9s ease-out 2; }
+  .note-card.flash { outline: 2px solid var(--accent); }
+  .card label.row { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 13.5px; margin-top: 8px; }
+  .card input[type=range] { width: 100%; accent-color: var(--accent); }
+  .card select { width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 10px; }
+  .card code { font-family: var(--mono); font-size: 12px; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; word-break: break-all; }
+
+  /* ---- hover feedback that was missing: sidebar tabs, note cards, the note bubble, active/“on” controls ---- */
+  .tabs button { transition: color .12s, background-color .12s, border-color .12s; border-radius: 5px 5px 0 0; }
+  .tabs button:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+  .tabs button.active:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .note-card { transition: background-color .15s, border-color .15s, box-shadow .15s; }
+  .note-card:not(.done):hover { background: var(--surface-2); box-shadow: 0 1px 6px rgba(0,0,0,.08); }
+  .bubble { cursor: pointer; transition: filter .12s, transform .12s; }
+  .bubble:hover { filter: brightness(1.18); transform: translateY(-1px); }
+  .tb-btn.active:hover { filter: brightness(.96); }
+  .seg .tb-btn.active:hover { filter: none; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+  .status button.on:hover { filter: brightness(.9); }
+  .menu button.on:hover { background: color-mix(in srgb, var(--accent) 22%, var(--accent-soft)); }
+  .tab.active:hover { background: color-mix(in srgb, var(--ink) 3%, var(--surface)); }
+  .tab:not(.active):hover { background: color-mix(in srgb, var(--ink) 12%, var(--surface-2)); }
+  .tb-btn.primary:hover { filter: brightness(1.12); box-shadow: 0 1px 6px rgba(0,0,0,.18); }
+  .tb-btn.primary:active { filter: brightness(.94); }
+  .tb-btn:active:not(.primary) { background: var(--line); }
+
+  /* ---- Save / Copy Markdown: cross-fade to a short “done” label and back ---- */
+  .tb-btn.swap { display: inline-grid; place-items: center; }
+  .tb-btn.swap > span { grid-area: 1 / 1; transition: opacity .25s ease, transform .25s ease; }
+  .tb-btn.swap .l2 { opacity: 0; transform: translateY(5px); }
+  .tb-btn.swap.did .l1 { opacity: 0; transform: translateY(-5px); }
+  .tb-btn.swap.did .l2 { opacity: 1; transform: none; }
+
+  /* ---- Notes: types, nested highlights, sidebar switch ---- */
+  .note-mark .note-mark { filter: brightness(.86); border-bottom-width: 3px; }
+  .note-mark .note-mark:hover, .note-mark .note-mark.focus { filter: brightness(.78); }
+  .linkish { background: none; border: 0; padding: 0; margin-top: 10px; font: inherit; font-size: 12px; color: var(--ink-3); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .linkish:hover { color: var(--ink); }
+  .mode-swap { opacity: 0; }
+    .kind-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  .kind-hint { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
+  .note-card .kind, .mn-kind { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; padding: 1px 6px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); }
+  .note-card .kind.k-ask, .mn-card.k-ask .mn-kind { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+  .note-card .kind.k-keep, .mn-card.k-keep .mn-kind { background: var(--surface-2); color: var(--ink-3); }
+  .note-card .kind.k-change { display: none; }
+  .mn-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 2px 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-3); cursor: pointer; user-select: none; }
+  .mn-toggle:hover { color: var(--ink); }
+  .mn-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+  .mn-toggle .sw { width: 26px; height: 15px; border-radius: 9px; background: var(--line); position: relative; transition: background-color .18s; flex: none; }
+  .mn-toggle .sw::after { content: ""; position: absolute; left: 2px; top: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .18s; }
+  .mn-toggle input:checked + .sw { background: var(--accent); }
+  .mn-toggle input:checked + .sw::after { transform: translateX(11px); }
+  .mn-toggle input:focus-visible + .sw { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .sort-row { margin-top: 8px; } .sort-row .seg { display: flex; } .sort-row .seg .tb-btn { flex: 1; height: 24px; font-size: 12px; }
+  details.trash { margin: 14px 2px 4px; font-size: 12px; color: var(--ink-3); }
+  details.trash summary { cursor: pointer; padding: 4px 0; user-select: none; } details.trash summary:hover { color: var(--ink); }
+  .trash-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); }
+  .trash-row .tt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .trash-row button { color: var(--accent); font-size: 12px; } .trash-row button:hover { text-decoration: underline; }
+  /* ---- Notes beside the page ---- */
+  .work { --mn-w: 244px; }
+  .work.mn-on .toastui-editor-ww-container .toastui-editor-contents {
+    padding-left: max(32px, calc((100% - var(--doc-width) - var(--mn-w)) / 2)) !important;
+    padding-right: calc(max(32px, calc((100% - var(--doc-width) - var(--mn-w)) / 2)) + var(--mn-w)) !important;
+  }
+  .margin-lane { position: absolute; top: 0; bottom: 0; right: 12px; width: calc(var(--mn-w) - 22px); overflow: hidden; pointer-events: none; z-index: 30; }
+  .margin-lane[hidden] { display: none; }
+  .mn-card { position: absolute; left: 0; right: 0; top: 0; pointer-events: auto; padding: 7px 9px 6px; font-size: 12.5px; line-height: 1.4; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-left: 3px solid var(--note-ink); border-radius: var(--radius); box-shadow: 0 1px 4px rgba(0,0,0,.07); cursor: pointer; transition: box-shadow .15s, background-color .15s; }
+  .mn-card:hover { background: var(--surface-2); box-shadow: 0 3px 12px rgba(0,0,0,.14); z-index: 2; }
+  .mn-card[hidden] { display: none; }
+  .mn-card.flash { outline: 2px solid var(--accent); }
+  .mn-card.k-ask { border-left-color: var(--warn); }
+  .mn-kind { display: inline-block; margin-bottom: 3px; }
+  .mn-card.k-change .mn-kind { display: none; }
+  .mn-text { white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+  .mn-card:hover .mn-text { -webkit-line-clamp: unset; }
+  .mn-actions { display: none; gap: 10px; margin-top: 5px; font-size: 11px; }
+  .mn-card:hover .mn-actions { display: flex; }
+  .mn-actions button { color: var(--ink-3); } .mn-actions button:hover { color: var(--accent); }
+
+  /* ---- Motion (all of it off when macOS Reduce Motion is on) ---- */
+  @keyframes veilIn { from { background-color: rgba(10,14,18,0); } to { background-color: rgba(10,14,18,.5); } }
+  @keyframes veilOut { from { background-color: rgba(10,14,18,.5); } to { background-color: rgba(10,14,18,0); } }
+  @keyframes cardOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(6px) scale(.985); } }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+  @keyframes noteIn { from { opacity: 0; transform: translateY(-6px) scale(.98); background: var(--accent-soft); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: no-preference) {
+    .modal.on { animation: veilIn .16s ease-out; }
+    .modal.on.closing { animation: veilOut .15s ease-in forwards; }
+    .modal.on.closing .card { animation: cardOut .15s ease-in forwards; }
+    .status .msg:not(:empty) { animation: msgIn .2s ease-out; }
+    .panel.active { animation: panelIn .16s ease-out; }
+    .findbar.on { animation: fadeIn .14s ease-out; }
+    .note-card.fresh { animation: noteIn .35s ease-out; }
+    .note-card.leaving { opacity: 0; transform: translateX(8px); }
+    .note-card.leaving { transition: opacity .16s ease-in, transform .16s ease-in; }
+    .mn-card { transition: box-shadow .15s, background-color .15s; }
+    .tabs button.active { transition: color .12s, border-color .2s; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tb-btn.swap > span { transition: none; } }
+  .status .msg { transition: opacity .35s ease; }
+  .status .msg.fade { opacity: 0; }
+  body.native .tabstrip { padding-left: 84px; }
+  .tabstrip { -webkit-app-region: drag; }
+  .tabstrip button, .tabstrip .tab, .tabstrip .tab * { -webkit-app-region: no-drag; }
+  body.native .browser-only { display: none !important; }
+  body.native .topbar .wordmark { display: none; }
+  .tabstrip .wordmark { align-self: center; margin: 0 14px 0 8px; }
+  body.native .tabstrip .wordmark { display: none; }
+  body.home .side, body.home .gutter, body.home .topbar > .sep, body.home .topbar [data-cmd], body.home .topbar .menu-wrap:has(#btnHeading), body.home #btnLink, body.home #btnOutdent, body.home #btnIndent, body.home #btnTable, body.home #btnNote, body.home #btnFind, body.home #btnSave, body.home .seg, body.home #moreWrap, body.home #btnSide { display: none !important; }
+  body.home .status > span:not(.spacer):not(.msg), body.home #btnZoom, body.home #btnAutosave { visibility: hidden; }
+  body { text-shadow: none; }
+  [data-theme="matrix"] body, [data-theme="matrix"] .topbar, [data-theme="matrix"] .side, [data-theme="matrix"] .status { text-shadow: var(--glow); }
+  [data-theme="matrix"] .editor-host::after { content: ""; pointer-events: none; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px); opacity: .5; }
+  [data-theme="matrix"] .tb-btn.primary { box-shadow: 0 0 10px rgba(0,255,106,.5); }
+  @media (max-width: 760px) { .hide-sm { display: none !important; } .side { position: absolute; z-index: 20; height: 100%; } }
+</style>
+</head>
+<body>
+
+<div class="tabstrip" id="tabstrip"><button class="tab-home" id="btnHome" title="Home (⇧⌘H)"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg></button><span class="wordmark" id="wordmark" aria-label="Edith">edith</span><div class="tabs-scroll" id="tabsScroll"></div><button class="tab-add" id="tabAdd" title="New tab (⌘T)">+</button></div>
+<header class="topbar" id="topbar">
+  <button class="tb-btn" id="btnSide" title="Show or hide the sidebar (⌘\)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+  </button>
+  <div class="filename" hidden><input id="fname" value="untitled.md"><span id="dirty" class="dirty"></span></div>
+
+  <div class="menu-wrap">
+    <button class="tb-btn browser-only" id="btnFileMenu" title="File">
+      <svg viewBox="0 0 24 24"><path d="M3 7h5l2 2h11v10H3z"/></svg> File
+    </button>
+    <div class="menu" id="fileMenu" hidden>
+      <button data-act="new">New tab <span class="k">⌘T</span></button>
+      <button data-act="open">Open…<span class="k">⌘O</span><span class="sub">Markdown, text, Word or PDF</span></button>
+      <button data-act="recent" class="browser-only">Recent files…<span class="k">⇧⌘O</span></button>
+      <button data-act="reveal" id="actReveal">Show file in Finder</button>
+      <div class="mdiv"></div>
+      <button data-act="save">Save <span class="k">⌘S</span></button>
+      <button data-act="saveas">Save as…<span class="k">⇧⌘S</span></button>
+      <button data-act="snapshot">Save a version now<span class="k">⌥⌘S</span></button>
+      <div class="mdiv"></div>
+      <div class="mh">Export</div>
+      <button data-act="copymd">Copy as Markdown<span class="sub">for AI chats, GitHub</span></button>
+      <button data-act="revprompt">Copy notes as a prompt<span class="sub">your comments, ready for any AI chat</span><span class="k">⇧⌘R</span></button>
+      <button data-act="copyrich">Copy as formatted text<span class="sub">for Google Docs, Slack, email</span></button>
+      <button data-act="downloadmd">Save a .md copy…<span class="sub">just the text, no notes</span></button>
+      <button data-act="downloadmdnotes">Save a .md copy with notes…</button>
+      <button data-act="margin" class="browser-only">Show notes beside the page</button>
+      <button data-act="exporthtml">Export as HTML…</button>
+      <button data-act="print">Print / Save as PDF…<span class="k">⌘P</span></button>
+      <div class="mdiv"></div>
+      <button data-act="whatsnew">What’s new in this version</button>
+    </div>
+  </div>
+  <button class="tb-btn primary swap" id="btnCopyScratch" title="Copy the whole document as Markdown" hidden><span class="l1">Copy Markdown</span><span class="l2">Copied ✓</span></button>
+  <button class="tb-btn primary swap" id="btnSave" title="Save (⌘S)"><span class="l1">Save</span><span class="l2">Saved ✓</span></button>
+
+  <span class="sep"></span>
+
+  <button class="tb-btn" data-cmd="bold" title="Bold (⌘B)"><svg viewBox="0 0 24 24"><path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z" stroke-width="2.2"/></svg></button>
+  <button class="tb-btn" data-cmd="italic" title="Italic (⌘I)"><svg viewBox="0 0 24 24"><path d="M10 5h8M6 19h8M14 5l-4 14" stroke-width="2"/></svg></button>
+  <button class="tb-btn" data-pri="1" data-cmd="strike" data-label="Strikethrough" title="Strikethrough (⇧⌘X)"><svg viewBox="0 0 24 24"><path d="M4 12h16M17 7.5c-.6-1.8-2.5-2.8-5-2.8-3 0-4.8 1.4-4.8 3.3 0 1.4.9 2.3 2.8 3M7 16.5c.6 1.8 2.5 2.8 5 2.8 3 0 4.8-1.4 4.8-3.3 0-.5-.1-1-.3-1.3"/></svg></button>
+  <button class="tb-btn" data-pri="1" data-cmd="code" data-label="Inline code" title="Inline code (⌘E)"><svg viewBox="0 0 24 24"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></svg></button>
+  <div class="menu-wrap">
+    <button class="tb-btn" id="btnHeading" title="Paragraph style"><svg viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M6 12h12" stroke-width="2.2"/></svg>
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="menu" id="headingMenu" hidden>
+      <button data-h="0">Normal text <span class="k">⌥⌘0</span></button>
+      <button data-h="1" style="font-size:17px;font-weight:600">Title <span class="k">⌥⌘1</span></button>
+      <button data-h="2" style="font-size:15px;font-weight:600">Heading <span class="k">⌥⌘2</span></button>
+      <button data-h="3" style="font-weight:600">Subheading <span class="k">⌥⌘3</span></button>
+      <button data-h="4">Minor heading <span class="k">⌥⌘4</span></button>
+    </div>
+  </div>
+  <button class="tb-btn" data-pri="3" data-cmd="bulletList" data-label="Bulleted list" title="Bulleted list (⇧⌘8)">
+    <svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/></svg>
+  </button>
+  <button class="tb-btn" data-pri="3" data-cmd="orderedList" data-label="Numbered list" title="Numbered list (⇧⌘7)">
+    <svg viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 5l1.5-1v4M3.5 11.5a1.5 1.5 0 1 1 2.5 1l-2.5 2.5h3M3.5 16.5h1.7a1.3 1.3 0 0 1 0 2.6H4.5h.7a1.3 1.3 0 0 1 0 2.6H3.5"/></svg>
+  </button>
+  <button class="tb-btn" data-pri="1" data-cmd="taskList" data-label="Checklist" title="Checklist (⇧⌘9)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="M7 12l3 3 5-6"/></svg>
+  </button>
+  <button class="tb-btn" data-pri="2" id="btnOutdent" data-label="Decrease indent" title="Decrease indent (⌘[)">
+    <svg viewBox="0 0 24 24"><path d="M11 6h9M11 12h9M11 18h9M3 12l4-3v6z" fill="currentColor"/></svg>
+  </button>
+  <button class="tb-btn" data-pri="2" id="btnIndent" data-label="Increase indent" title="Increase indent (⌘])">
+    <svg viewBox="0 0 24 24"><path d="M11 6h9M11 12h9M11 18h9M7 12l-4-3v6z" fill="currentColor"/></svg>
+  </button>
+  <button class="tb-btn" data-pri="1" data-cmd="blockQuote" data-label="Quote" title="Quote">
+    <svg viewBox="0 0 24 24"><path d="M6 17c0-4 2-7 5-8M14 17c0-4 2-7 5-8"/><path d="M6 17h3v-4H6zM14 17h3v-4h-3z"/></svg>
+  </button>
+  <button class="tb-btn" data-pri="1" data-cmd="codeBlock" data-label="Code block" title="Code block">
+    <svg viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13 5l-2 14"/></svg>
+  </button>
+  <button class="tb-btn" data-pri="2" id="btnLink" data-label="Link…" title="Link (⌘K)">
+    <svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5"/></svg>
+  </button>
+  <button class="tb-btn" data-pri="1" id="btnTable" data-label="Table…" title="Insert table">
+    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M3 15h18M9 5v14M15 5v14"/></svg>
+  </button>
+  <button class="tb-btn" data-pri="1" data-cmd="hr" data-label="Divider" title="Divider line"><svg viewBox="0 0 24 24"><path d="M4 12h16"/><path d="M8 6h8M8 18h8" opacity=".4"/></svg></button>
+  <button class="tb-btn" id="btnNote" title="Add a note on the selected text (⇧⌘M)">
+    <svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg><span class="lbl" data-pri="2">Note</span>
+  </button>
+  <button class="tb-btn" data-pri="2" id="btnFind" data-label="Find & replace…" title="Find & replace (⌘F)">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+  </button>
+  <div class="menu-wrap" id="moreWrap" hidden>
+    <button class="tb-btn" id="btnMore" title="More tools"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="18" cy="12" r="1.4" fill="currentColor"/></svg></button>
+    <div class="menu" id="moreMenu" hidden></div>
+  </div>
+
+  <span class="spacer"></span>
+
+  <div class="seg">
+    <button class="tb-btn active" data-mode="wysiwyg" title="Edit like a normal document (⇧⌘1)">Write</button>
+    <button class="tb-btn" data-mode="markdown" title="Edit the raw Markdown (⇧⌘2)">Markdown</button>
+    <button class="tb-btn" id="btnPreview" title="Show / hide the preview (⌥⌘P)" hidden>Preview</button>
+  </div>
+  <span class="sep"></span>
+  <div class="menu-wrap">
+    <button class="tb-btn" id="btnTheme" title="Theme">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+    </button>
+    <div class="menu right" id="themeMenu" hidden></div>
+  </div>
+  <button class="tb-btn" id="btnPrefs" title="Preferences (⌘,)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+  </button>
+  <button class="tb-btn" id="btnHelp" title="Shortcuts & help (⌘/)"><b>?</b></button>
+</header>
+
+
+<div class="findbar" id="findbar">
+  <input id="findQ" placeholder="Find" aria-label="Find">
+  <span class="cnt" id="findCnt"></span>
+  <button class="tb-btn" id="findPrev" title="Previous (⇧Enter)">↑</button>
+  <button class="tb-btn" id="findNext" title="Next (Enter)">↓</button>
+  <input id="findR" placeholder="Replace with" aria-label="Replace with">
+  <button class="tb-btn" id="replOne">Replace</button>
+  <button class="tb-btn" id="replAll">Replace all</button>
+  <span class="spacer"></span>
+  <button class="tb-btn" id="findClose" title="Close (Esc)">✕</button>
+</div>
+
+<main class="work" id="work">
+  <aside class="side" id="side">
+    <div class="tabs">
+      <button class="active" data-tab="outline">Outline<span class="n" id="nOutline"></span></button>
+      <button data-tab="notes">Notes<span class="n" id="nNotes"></span></button>
+      <button data-tab="history">History<span class="n" id="nHistory"></span></button>
+    </div>
+    <div class="panel active" id="panel-outline"></div>
+    <div class="panel" id="panel-notes"></div>
+    <div class="panel" id="panel-history"></div>
+  </aside>
+  <div class="gutter" id="sideGutter" title="Drag to resize"></div>
+  <section class="editor-host" id="editorHost">
+    <div class="start" id="start" hidden><div class="start-card">
+      <img class="start-logo" src="data:image/png;base64,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" alt="" width="120" height="120">
+      <h1 id="startGreeting">What shall we work on?</h1>
+      <p class="lead" id="startLead">Open a draft to read and revise it like a document, or start a fresh one. Whatever you save here is clean Markdown.</p>
+      <div class="actions"><button class="tb-btn primary" id="startNew">New document</button><button class="tb-btn" id="startScratch">Paste from clipboard<span class="sub">Edit it, then copy it back</span></button><button class="tb-btn" id="startOpen">Open a file…<span class="sub">Markdown, text, Word or PDF</span></button></div>
+      <h2 id="startRecentHead">Recent</h2><div class="recent-grid" id="startRecent"></div>
+      <p class="hint">Drop a file anywhere on this window to open it. Paste from an AI chat and the Markdown turns into formatting.</p>
+    </div></div>
+  </section>
+</main>
+
+<footer class="status">
+  <span id="stWords">0 words</span>
+  <span id="stChars" class="hide-sm">0 characters</span>
+  <span id="stRead" class="hide-sm">&lt;1 min read</span>
+  <span class="spacer"></span>
+  <span id="stMsg" class="msg"></span>
+  <span class="menu-wrap"><button id="btnZoom" title="Text size">100%</button>
+    <div class="menu right up" id="zoomMenu" hidden>
+      <div class="zoomrow"><button id="btnSmaller" title="Smaller (⌘−)">−</button><span id="zoomVal">100%</span><button id="btnBigger" title="Larger (⌘+)">+</button></div>
+      <div class="mdiv"></div>
+      <button data-zoom="80">80%</button><button data-zoom="90">90%</button><button data-zoom="100">100% <span class="k">⌘0</span></button><button data-zoom="115">115%</button><button data-zoom="130">130%</button><button data-zoom="150">150%</button>
+      <div class="mdiv"></div>
+      <div class="mh">Page width</div>
+      <button data-width="normal">Comfortable</button><button data-width="wide">Wide</button><button data-width="full">Full window</button>
+    </div></span>
+  <button id="btnAutosave" class="hide-sm" title="When on, changes are written to the open file a moment after you stop typing">Autosave: off</button>
+</footer>
+
+<div class="drop" id="drop">Drop a Markdown, Word, PDF, HTML or text file to open it in a new tab</div>
+
+<!-- Help -->
+<div class="modal" id="mHelp">
+  <div class="card">
+    <div class="card-h">Shortcuts &amp; tips</div>
+    <div class="card-b">
+      <table class="k">
+        <tr><td>New tab / Open / Save / Save as</td><td>⌘T / ⌘O / ⌘S / ⇧⌘S</td></tr>
+        <tr><td>Close tab / Next, previous tab</td><td>⌘W / ⌘⇧] , ⌘⇧[</td></tr>
+        <tr><td>Find &amp; replace</td><td>⌘F</td></tr>
+        <tr><td>Bold / Italic / Strike / Code</td><td>⌘B / ⌘I / ⌘⇧X / ⌘E</td></tr>
+        <tr><td>Normal text / Title / Heading / Subheading</td><td>⌥⌘0 / ⌥⌘1 / ⌥⌘2 / ⌥⌘3</td></tr>
+        <tr><td>Bulleted / Numbered list</td><td>⌘⇧8 / ⌘⇧7</td></tr>
+        <tr><td>Link</td><td>⌘K</td></tr>
+        <tr><td>Increase / Decrease indent</td><td>⌘] / ⌘[ (or Tab / ⇧Tab in a list)</td></tr>
+        <tr><td>Add a note on selection</td><td>⌘⇧M</td></tr>
+        <tr><td>Copy all open notes as a prompt for an AI chat</td><td>⇧⌘R</td></tr>
+        <tr><td>Write mode / Markdown mode</td><td>⌘⇧1 / ⌘⇧2</td></tr>
+        <tr><td>Home / Toggle sidebar / Focus mode</td><td>⇧⌘H / ⌘\ / ⇧⌘F</td></tr>
+        <tr><td>Text size / reset to 100%</td><td>⌘+ , ⌘− / ⌘0</td></tr>
+        <tr><td>Print / Save as PDF</td><td>⌘P</td></tr>
+        <tr><td>Close panels</td><td>Esc</td></tr>
+      </table>
+      <h3>Typing shortcuts in Write mode</h3>
+      <p>At the start of a line, type <b>#</b> + space for a title, <b>##</b> for a heading, <b>-</b> or <b>*</b> for a bullet, <b>1.</b> for a numbered list, <b>[ ]</b> for a checkbox, <b>&gt;</b> for a quote, <b>```</b> for a code block, or <b>---</b> for a divider. Everything is saved as clean Markdown.</p>
+      <h3>Pasting from an AI chat</h3>
+      <p>Paste raw Markdown into Write mode and Edith renders it as formatting instead of showing the symbols. Pasting from Google Docs or Word keeps its formatting too. To send text back, use File → Copy as Markdown (for AI tools) or Copy as formatted text (for Docs, Slack, email).</p>
+      <h3>Notes</h3>
+      <p>Select some text and press ⌘⇧M to attach a note. Notes live in the sidebar, in page order; click one to jump back to its text. Switch on <b>Beside the page</b> at the top of the Notes panel to see each note next to its passage as well. They are kept by Edith itself (with plain-text backups in its data folder), never inside your .md files, so a file stays clean wherever you send it. Deleted notes wait under <b>Recently deleted</b> for 90 days. “Save a .md copy with notes” is there if you ever want them in a file.</p>
+      <p>Write notes naturally; there is nothing to sort. <b>Copy as prompt</b> (also under File → Export, ⇧⌘R) turns every open note into one message for an AI chat, in page order, and tells the AI to judge each one: answer questions first, make clear edits, leave alone anything you said works. If you want to be explicit, choose <b>Mark as a question or keep-as-is</b> when writing a note.</p>
+      <h3>Versions</h3>
+      <p>Every save and import is kept as a version, plus an automatic one every 10 minutes while you're editing. Open History to compare any version with the current text, or restore it.</p>
+      <p id="helpNote"></p>
+    </div>
+    <div class="card-f"><button class="tb-btn primary" data-close>Done</button></div>
+  </div>
+</div>
+
+<!-- Note editor -->
+<div class="modal" id="mNote">
+  <div class="card">
+    <div class="card-h" id="noteTitle">Add a note</div>
+    <div class="card-b">
+      <div class="quote" id="noteQuote"></div>
+      <label for="noteText">Note</label>
+      <textarea id="noteText" placeholder="What do you want to come back to?"></textarea>
+      <button type="button" class="linkish" id="kindMore">Mark as a question or keep-as-is…</button>
+      <div class="kind-row" id="kindRow" hidden><span class="seg" id="noteKind" role="radiogroup" aria-label="What kind of note is this?">
+        <button type="button" class="tb-btn" data-kind="change" title="A change you want made to this passage">Change</button>
+        <button type="button" class="tb-btn" data-kind="ask" title="A question: you want an answer before anything is changed">Ask</button>
+        <button type="button" class="tb-btn" data-kind="keep" title="This passage works: leave it alone">Keep</button>
+      </span><span class="kind-hint" id="kindHint"></span></div>
+    </div>
+    <div class="card-f">
+      <button class="tb-btn" data-close>Cancel</button>
+      <button class="tb-btn primary" id="noteSave">Save note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rename -->
+<div class="modal" id="mRename">
+  <div class="card">
+    <div class="card-h">Rename document</div>
+    <div class="card-b"><label for="renameInput">File name</label><input type="text" id="renameInput"><p>Renaming sets a new name for the next Save; the file on disk is not renamed until you save.</p></div>
+    <div class="card-f"><button class="tb-btn" data-close>Cancel</button><button class="tb-btn primary" id="renameOk">Rename</button></div>
+  </div>
+</div>
+
+<!-- Link -->
+<div class="modal" id="mLink">
+  <div class="card">
+    <div class="card-h">Insert link</div>
+    <div class="card-b">
+      <label for="linkText">Text</label><input type="text" id="linkText">
+      <label for="linkUrl">URL</label><input type="url" id="linkUrl" placeholder="https://">
+    </div>
+    <div class="card-f">
+      <button class="tb-btn" data-close>Cancel</button>
+      <button class="tb-btn primary" id="linkOk">Insert</button>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="modal" id="mTable">
+  <div class="card">
+    <div class="card-h">Insert table</div>
+    <div class="card-b">
+      <label for="tblCols">Columns</label><input type="text" id="tblCols" value="3">
+      <label for="tblRows">Rows (including header)</label><input type="text" id="tblRows" value="3">
+    </div>
+    <div class="card-f">
+      <button class="tb-btn" data-close>Cancel</button>
+      <button class="tb-btn primary" id="tblOk">Insert</button>
+    </div>
+  </div>
+</div>
+
+<!-- Version diff -->
+<div class="modal" id="mDiff">
+  <div class="card wide">
+    <div class="card-h"><span id="diffTitle">Version</span><span class="sub" id="diffSub"></span>
+      <span class="seg" style="margin-left:auto"><button class="tb-btn active" data-dview="changes">Changes</button><button class="tb-btn" data-dview="full">Full text</button></span>
+    </div>
+    <div class="card-b"><div class="diff" id="diffBody"></div><div class="diff full" id="diffFull" hidden></div></div>
+    <div class="card-f">
+      <button class="tb-btn danger" id="diffDelete">Delete this version</button>
+      <button class="tb-btn" data-close>Close</button>
+      <button class="tb-btn" id="diffCopy">Copy full text</button>
+      <button class="tb-btn primary" id="diffRestore">Restore this version</button>
+    </div>
+  </div>
+</div>
+
+<!-- Recent files -->
+<div class="modal" id="mRecent">
+  <div class="card">
+    <div class="card-h">Recent files</div>
+    <div class="card-b" id="recentBody"></div>
+    <div class="card-f"><button class="tb-btn" data-close>Close</button></div>
+  </div>
+</div>
+
+<!-- Import progress -->
+<div class="modal" id="mBusy">
+  <div class="card">
+    <div class="card-h" id="busyTitle">Converting…</div>
+    <div class="card-b"><p id="busyText">This runs entirely on your Mac. Nothing is uploaded.</p><div class="progress"><i></i></div></div>
+  </div>
+</div>
+
+<!-- What's new -->
+<div class="modal" id="mChangelog">
+  <div class="card">
+    <div class="card-h">What’s new in Edith</div>
+    <div class="card-b" id="changelogBody"></div>
+    <div class="card-f"><button class="tb-btn primary" data-close>Done</button></div>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="modal" id="mConfirm">
+  <div class="card">
+    <div class="card-h" id="confirmTitle">Discard changes?</div>
+    <div class="card-b"><p id="confirmText"></p></div>
+    <div class="card-f">
+      <button class="tb-btn" data-close>Cancel</button>
+      <button class="tb-btn primary" id="confirmOk">Discard</button>
+    </div>
+  </div>
+</div>
+
+<button class="bubble" id="noteBubble" hidden>
+  <svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg> Add note
+</button>
+<div class="ctx" id="ctxMenu" hidden>
+  <button data-ctx="note">Add note on selection</button>
+  <button data-ctx="copy">Copy</button>
+  <button data-ctx="cut">Cut</button>
+  <button data-ctx="paste">Paste</button>
+</div>
+
+<!-- Preferences -->
+<div class="modal" id="mPrefs">
+  <div class="card">
+    <div class="card-h">Preferences</div>
+    <div class="card-b">
+      <h3>Saving</h3>
+      <label class="row"><input type="checkbox" id="pAutosave"> Autosave changes to the open file</label>
+      <label for="pDelay">Save after you stop typing for <output id="pDelayOut">2</output> seconds</label>
+      <input type="range" id="pDelay" min="1" max="30" step="1">
+      <p>Autosave writes into the file you opened — there is no separate autosave file. Until a document has been saved once, nothing is autosaved; a recovery draft is kept instead and offered back to you if the app closes unexpectedly.</p>
+      <h3>Version history</h3>
+      <label for="pVer">Keep an automatic version every <output id="pVerOut">10</output> minutes while editing</label>
+      <input type="range" id="pVer" min="1" max="60" step="1">
+      <label for="pVerMax">Versions kept per file: <output id="pVerMaxOut">150</output></label>
+      <input type="range" id="pVerMax" min="20" max="500" step="10">
+      <label for="pCap">Total space for version history: <output id="pCapOut">250</output> MB</label>
+      <input type="range" id="pCap" min="25" max="2000" step="25">
+      <p id="pUsage"></p>
+      <div class="panel-actions"><button class="tb-btn" id="pClearHistory">Delete all version history…</button></div>
+      <h3>Editing</h3>
+      <label class="row"><input type="checkbox" id="pSpell"> Check spelling as you type</label>
+      <label for="pMode">Open documents in</label>
+      <select id="pMode"><option value="wysiwyg">Write mode (formatted)</option><option value="markdown">Markdown mode (raw)</option></select>
+      <label for="pTheme">Theme</label>
+      <select id="pTheme"></select>
+      <label for="pSize">Document text size: <output id="pSizeOut">16</output> px</label>
+      <input type="range" id="pSize" min="12" max="26" step="1">
+      <h3>Layout</h3>
+      <div class="panel-actions"><button class="tb-btn" id="pResetLayout">Reset panel sizes and text size</button></div>
+      <p>You can also double-click any divider to snap it back to its default width.</p>
+      <h3>Where things are stored</h3>
+      <p id="pStorage"></p>
+      <div class="panel-actions" id="pStorageActions"></div>
+    </div>
+    <div class="card-f"><button class="tb-btn primary" data-close>Done</button></div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" hidden accept=".md,.markdown,.txt,.docx,.pdf,.html,.htm">
+<script type="text/plain" id="pdfWorkerSrc">
+/*__INLINE_WORKER:node_modules/pdfjs-dist/build/pdf.worker.min.mjs__*/
+</script>
+<script>/*__INLINE_JS:vendor.min.js__*/</script>
+<script>/*__INLINE_JS:node_modules/mammoth/mammoth.browser.min.js__*/</script>
+<script type="module">/*__INLINE_JS:node_modules/pdfjs-dist/build/pdf.min.mjs__*/</script>
+<script>window.EDITH_CHANGELOG = /*__INLINE_JSON:CHANGELOG.md__*/;</script>
+<script>
+/*__INLINE_JS:app.js__*/
+</script>
+</body>
+</html>

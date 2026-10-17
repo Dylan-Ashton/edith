@@ -1,0 +1,14 @@
+# Fonts bundled into the app. build.py inlines each woff2 as a data: URL, so Edith never fetches fonts.
+# One line per family: <Fontsource package> <stylesheets>. Only the Latin and Latin Extended blocks are kept.
+# These are the families, weights and styles the themes use (IBM Plex for the default Edith theme and Dusk).
+# All are licensed under the SIL Open Font License 1.1; see fonts/LICENSES.md.
+ibm-plex-sans 400.css 500.css 600.css 400-italic.css
+ibm-plex-mono 400.css 500.css
+lora 400.css 600.css 400-italic.css
+nunito-sans 400.css 600.css 700.css
+fraunces 400.css 600.css 400-italic.css
+work-sans 400.css 500.css 600.css
+eb-garamond 400.css 600.css 400-italic.css
+source-sans-3 400.css 600.css
+inter 400.css 500.css 600.css
+share-tech-mono 400.css

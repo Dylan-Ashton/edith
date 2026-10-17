@@ -1,0 +1,61 @@
+# On every pull request (and on pushes to main): builds the app page and runs the browser tests, and builds the
+# Mac app the same way a release does, so it can be tried before anything is released. No tag, no release.
+name: Test
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm test
+
+  mac-app:
+    runs-on: macos-14   # Apple Silicon, same as release.yml
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+        env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1' }
+      - run: npm run package
+      - name: Check the app and make the zip
+        run: scripts/mac-zip.sh   # fails if no .app, the wrong Electron, or anything but arm64
+      - name: Check the zip opens (unzip -t, ditto, bsdtar, Archive Utility)
+        run: scripts/check-mac-zip.sh "out/Edith (Apple Silicon).zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Edith-PR-build
+          path: out/Edith (Apple Silicon).zip
+          retention-days: 7
+          if-no-files-found: error
+
+  # The uploaded zip, opened on the newest macOS the way a double-click does (Archive Utility), plus the other tools.
+  mac-zip-macos-26:
+    needs: mac-app
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: Edith-PR-build, path: dl }
+      - name: Open the PR build's zip on macOS 26
+        run: scripts/check-mac-zip.sh "dl/Edith (Apple Silicon).zip"
+      - name: "Diagnostics only: the same app zipped the pre-3.7.3 way (Info-ZIP zip -qry)"
+        run: |
+          ditto -x -k "dl/Edith (Apple Silicon).zip" old
+          mkdir old-zip && (cd "old/Edith (Apple Silicon)" && zip -qry "../../old-zip/Edith (Apple Silicon).zip" .)
+          scripts/check-mac-zip.sh "old-zip/Edith (Apple Silicon).zip" --report-only

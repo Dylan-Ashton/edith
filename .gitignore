@@ -1,0 +1,9 @@
+node_modules/
+build/
+dist.html
+vendor.min.js
+electron-app/index.html
+/h?.png
+/s?.png
+/shot*.png
+/e?.png

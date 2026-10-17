@@ -1,0 +1,13 @@
+import Editor from '@toast-ui/editor';
+import TurndownService from 'turndown';
+import { gfm } from 'turndown-plugin-gfm';
+import * as Diff from 'diff';
+window.toastui = { Editor };
+window.TurndownService = TurndownService;
+window.turndownPluginGfm = { gfm };
+window.Diff = Diff;
+import { Plugin, PluginKey, TextSelection } from 'prosemirror-state';
+import { Decoration, DecorationSet } from 'prosemirror-view';
+import { lift } from 'prosemirror-commands';
+import { undoDepth, redoDepth } from 'prosemirror-history';
+window.PM = { Plugin, PluginKey, TextSelection, Decoration, DecorationSet, lift, undoDepth, redoDepth };

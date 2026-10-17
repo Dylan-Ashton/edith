@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edith: Markdown, finally readable. Free for Mac.</title>
+<meta name="description" content="Edith opens the Markdown that AI tools, wikis and teammates hand you as a clean document. Edit it like any doc, leave notes, and hand them to your AI in one click. Free for Mac.">
+<link rel="canonical" href="https://dylan-ashton.github.io/edith/">
+<meta name="theme-color" content="#F1E9D8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#332E28" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Edith">
+<meta property="og:title" content="Edith: your Markdown files, finally readable">
+<meta property="og:description" content="Read and revise Markdown like a normal document. Leave notes, hand them to your AI in one click. Free for Mac.">
+<meta property="og:url" content="https://dylan-ashton.github.io/edith/">
+<meta property="og:image" content="https://dylan-ashton.github.io/edith/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Edith","operatingSystem":"macOS 13 or later (Apple Silicon)","applicationCategory":"ProductivityApplication","softwareVersion":"3.7.3","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A Mac app for reading and revising Markdown files as ordinary documents.","url":"https://dylan-ashton.github.io/edith/","author":{"@type":"Person","name":"Dylan Ricci"}}
+</script>
+<style>
+@font-face{font-family:"Plex";src:url(assets/fonts/IBMPlexSans-Regular.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Plex";src:url(assets/fonts/IBMPlexSans-Medium.woff) format("woff");font-weight:500;font-display:swap}
+@font-face{font-family:"Plex";src:url(assets/fonts/IBMPlexSans-SemiBold.woff) format("woff");font-weight:600;font-display:swap}
+@font-face{font-family:"PlexMono";src:url(assets/fonts/IBMPlexMono-Regular.woff) format("woff");font-weight:400;font-display:swap}
+:root{
+  --page:#FAF7EF; --chrome:#F1E9D8; --card:#FFFDF8; --line:#DCD2BC; --ink:#3E372E; --ink2:#6F6556;
+  --moss:#5E8A68; --moss-ink:#fff; --moss-hover:#527A5C; --sage:#CFE0CD; --sage-soft:#E0EADD;
+  --shadow:0 1px 2px rgba(62,55,46,.06),0 18px 50px -12px rgba(62,55,46,.28);
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --page:#2E2A24; --chrome:#332E28; --card:#3A352E; --line:#4B443A; --ink:#ECE4D2; --ink2:#B5AA96;
+  --moss:#8EB092; --moss-ink:#1F2A21; --moss-hover:#A3C2A7; --sage:#4C5B49; --sage-soft:#3E463A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 50px -12px rgba(0,0,0,.6);
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:72px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--page);color:var(--ink);font:400 18px/1.6 Plex,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto;display:block}
+a{color:var(--moss);text-underline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.narrow{max-width:760px}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--chrome) 88%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:24px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:21px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.brand img{width:28px;height:28px;border-radius:7px}
+.nav nav{display:flex;gap:22px;margin-left:auto;font-size:15px}
+.nav nav a{color:var(--ink2);text-decoration:none}
+.nav nav a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:12px 20px;font:500 16px/1 Plex,system-ui,sans-serif;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
+.btn-primary{background:var(--moss);color:var(--moss-ink)}
+.btn-primary:hover{background:var(--moss-hover)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-quiet{color:var(--ink);border-color:var(--line);background:var(--card)}
+.btn-quiet:hover{border-color:var(--moss)}
+.btn-sm{padding:8px 14px;font-size:14px;border-radius:8px}
+.btn svg{width:18px;height:18px;flex:none}
+
+/* hero */
+.hero{text-align:center;padding:72px 0 0}
+.eyebrow{display:inline-block;font-size:14px;font-weight:500;color:var(--ink2);background:var(--sage-soft);border:1px solid var(--line);padding:5px 12px;border-radius:999px;margin-bottom:22px}
+h1{font-size:clamp(38px,6.4vw,68px);line-height:1.04;font-weight:600;letter-spacing:-.025em;margin:0 auto 20px;max-width:880px}
+.sub{font-size:clamp(18px,2.2vw,21px);color:var(--ink2);max-width:640px;margin:0 auto 32px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.meta{font-size:14px;color:var(--ink2);margin-top:16px}
+.shot{border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;background:var(--chrome)}
+.hero .shot{margin:56px auto 0;max-width:1080px}
+.formats{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 28px;padding:40px 0 0;color:var(--ink2);font-size:15px}
+.formats b{color:var(--ink);font-weight:500}
+
+/* features */
+section.wrap{padding-top:104px}
+h1,h2{text-wrap:balance}
+.kicker{font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--moss);margin:0 0 12px}
+h2{font-size:clamp(30px,4vw,44px);line-height:1.1;letter-spacing:-.02em;font-weight:600;margin:0 0 16px}
+.lead{font-size:19px;color:var(--ink2);margin:0}
+.feature{display:grid;grid-template-columns:5fr 7fr;gap:56px;align-items:center}
+.feature.flip{grid-template-columns:7fr 5fr}
+.feature.flip .copy{order:2}
+.feature .copy p{color:var(--ink2);margin:0 0 14px}
+.feature .copy p:last-child{margin-bottom:0}
+.feature .copy b{color:var(--ink);font-weight:500}
+kbd{font:400 .85em PlexMono,ui-monospace,Menlo,monospace;background:var(--chrome);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--ink)}
+code{font:400 .88em PlexMono,ui-monospace,Menlo,monospace;background:var(--chrome);border-radius:5px;padding:1px 6px;color:var(--ink)}
+
+/* AI round trip */
+.trip{display:grid;grid-template-columns:7fr 5fr;gap:28px;align-items:start;margin-top:48px}
+.trip>*,.feature>*{min-width:0}
+.paste{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;position:relative}
+.paste-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink2);margin-bottom:12px}
+.paste-h i{width:8px;height:8px;border-radius:50%;background:var(--moss);display:inline-block}
+.paste pre{margin:0;white-space:pre-wrap;font:400 14px/1.55 Plex,system-ui,sans-serif;color:var(--ink);overflow-wrap:anywhere}
+.paste pre .q{color:var(--moss);font-weight:500}
+.trip-steps{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px;justify-content:center}
+.trip-steps span{font-size:15px;color:var(--ink2);background:var(--chrome);border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+.trip-steps span b{color:var(--ink);font-weight:500}
+
+/* details grid */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
+.cell h3{font-size:17px;font-weight:600;margin:0 0 6px}
+.cell p{margin:0;font-size:15.5px;color:var(--ink2);line-height:1.55}
+
+/* privacy */
+.privacy{background:var(--chrome);border:1px solid var(--line);border-radius:20px;padding:56px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.checks li{display:flex;gap:12px;align-items:flex-start;font-size:17px}
+.checks svg{flex:none;width:22px;height:22px;margin-top:2px;color:var(--moss)}
+.fine{font-size:14.5px;color:var(--ink2);margin-top:20px}
+
+/* download */
+.download{text-align:center}
+.dl-card{max-width:760px;margin:36px auto 0;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:44px 40px;text-align:left}
+.dl-top{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.dl-top img{width:72px;height:72px;border-radius:16px}
+.dl-top .t{flex:1;min-width:200px}
+.dl-top .t b{display:block;font-size:22px;font-weight:600}
+.dl-top .t span{font-size:15px;color:var(--ink2)}
+.steps{counter-reset:s;list-style:none;margin:32px 0 0;padding:28px 0 0;border-top:1px solid var(--line);display:grid;gap:16px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start;color:var(--ink2);font-size:16.5px}
+.steps li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--sage-soft);border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center}
+.steps b{color:var(--ink);font-weight:500}
+.new{max-width:760px;margin:20px auto 0;text-align:left;font-size:15.5px;color:var(--ink2)}
+.new b{color:var(--ink);font-weight:500}
+
+/* faq */
+.faq{max-width:760px;margin:36px auto 0}
+.faq details{border-bottom:1px solid var(--line);padding:4px 0}
+.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px;padding:18px 0;font-weight:500;font-size:18px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:22px;line-height:1;color:var(--ink2);transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq details p{margin:0 0 18px;color:var(--ink2)}
+
+/* video */
+#demo{display:none}
+#demo.on{display:block}
+#demo video{width:100%;display:block}
+
+footer{margin-top:120px;border-top:1px solid var(--line);background:var(--chrome)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;padding:32px 20px;font-size:15px;color:var(--ink2)}
+footer a{color:var(--ink2);text-decoration:none}
+footer a:hover{color:var(--ink)}
+footer .r{margin-left:auto;display:flex;gap:22px;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .feature,.feature.flip,.trip,.privacy{grid-template-columns:1fr;gap:28px}
+  .feature.flip .copy{order:0}
+  .grid{grid-template-columns:1fr 1fr}
+  .privacy{padding:36px 28px}
+  section.wrap{padding-top:80px}
+}
+@media (max-width:640px){
+  .nav nav{display:none}
+  .nav .btn{margin-left:auto}
+  .hero{padding-top:48px}
+  .grid{grid-template-columns:1fr}
+  .dl-card{padding:28px 22px}
+  footer .r{margin-left:0}
+  body{font-size:17px}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Edith home"><img src="assets/icon-256.png" alt="" width="28" height="28">edith</a>
+    <nav aria-label="Sections">
+      <a href="#features">Features</a>
+      <a href="#ai">With AI</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="#download">Download</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <span class="eyebrow">Free for Mac</span>
+    <h1>Your Markdown files, finally readable.</h1>
+    <p class="sub">Edith opens the Markdown that AI tools, wikis and teammates hand you as a clean document. Edit it like any doc, and it saves back as plain Markdown.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Download for Mac</a>
+      <a class="btn btn-quiet" id="seeHow" href="#features">See how it works</a>
+    </div>
+    <p class="meta">Version 3.7.3 · macOS 13 or later · Apple Silicon</p>
+    <div class="shot">
+      <picture>
+        <source srcset="assets/shots/write-dark.webp" media="(prefers-color-scheme: dark)">
+        <img src="assets/shots/write.webp" alt="Edith showing a launch brief as a formatted document, with an outline in the sidebar" width="1600" height="1006" fetchpriority="high">
+      </picture>
+    </div>
+    <p class="formats">Opens <b>.md</b> <b>.txt</b> <b>Word</b> <b>PDF</b> <b>HTML</b> <b>RTF</b> and saves clean Markdown.</p>
+  </div>
+
+  <section id="demo" class="wrap">
+    <div class="shot"><video id="demoVideo" controls playsinline preload="metadata" poster="assets/shots/write.webp" aria-label="Edith demo"></video></div>
+  </section>
+
+  <section id="features" class="wrap">
+    <div class="feature">
+      <div class="copy">
+        <p class="kicker">Write</p>
+        <h2>Read it like a document. Edit it like one too.</h2>
+        <p>Headings, lists, checklists, tables and quotes appear the way they are meant to be read. Click and type.</p>
+        <p>The shortcuts you know from Google Docs work, and so does Markdown: type <code>#</code> for a heading or <code>[ ]</code> for a checkbox. Nothing to memorize.</p>
+      </div>
+      <div class="shot"><picture><source srcset="assets/shots/blocks-dark.webp" media="(prefers-color-scheme: dark)"><img src="assets/shots/blocks.webp" alt="A checklist and a table in Edith's Write mode" width="1600" height="1006" loading="lazy"></picture></div>
+    </div>
+  </section>
+
+  <section id="ai" class="wrap">
+    <div class="narrow" style="margin:0 auto;text-align:center">
+      <p class="kicker">Notes and AI</p>
+      <h2>Mark it up. Hand it to your AI.</h2>
+      <p class="lead">Select any passage and leave a note: an edit, a question, or "keep this". Then <b style="color:var(--ink);font-weight:500">Copy as prompt</b> turns every note into one clear message for ChatGPT, Claude or any AI chat.</p>
+      <div class="trip-steps"><span><b>1</b> Leave notes</span><span><b>2</b> Copy as prompt <kbd>⇧⌘R</kbd></span><span><b>3</b> Paste into any AI chat</span></div>
+    </div>
+    <div class="trip">
+      <div class="shot"><picture><source srcset="assets/shots/notes-dark.webp" media="(prefers-color-scheme: dark)"><img src="assets/shots/notes.webp" alt="Two notes in Edith's sidebar, each attached to a highlighted passage" width="1600" height="1006" loading="lazy"></picture></div>
+      <div class="paste" aria-label="The prompt Edith copies">
+        <div class="paste-h"><i></i>What Edith copies, exactly</div>
+<pre>I have left 2 notes on "launch-brief". Each one quotes the passage it points to, in the order they appear.
+
+Use your judgement on each note rather than treating them all as edit orders:
+- If it is a question, or asks for your opinion, answer it and explain your reasoning. Do not change that passage until I have read your answer and approved.
+- If it is a clear instruction, make the edit.
+- If I say a passage works, or to keep it, leave it exactly as it is.
+- If a note is ambiguous, or you disagree with it, tell me and say what you would do instead of guessing.
+
+Leave everything I have not commented on as it is. Number your replies to match mine.
+
+---
+
+<span class="q">1. Under "Audience": "Freelancers who tried version 1 and stopped"</span>
+   Is this group big enough to target? Check the churn numbers first.
+
+<span class="q">2. Under "Key message": "Everything your team writes, in one calm place."</span>
+   Make this more specific to teams.</pre>
+      </div>
+    </div>
+    <p class="lead" style="text-align:center;margin-top:28px;font-size:16.5px">Notes are kept by Edith, not written into your file, so the Markdown stays clean wherever you send it.</p>
+  </section>
+
+  <section class="wrap">
+    <div class="feature flip">
+      <div class="copy">
+        <p class="kicker">Markdown</p>
+        <h2>The raw Markdown is one click away.</h2>
+        <p>Switch to Markdown mode to see the source with a live preview beside it. Both views edit the same file, and Edith keeps your place when you switch.</p>
+        <p>Paste Markdown from an AI chat and it turns into formatting. <b>Copy as Markdown</b> sends it back out.</p>
+      </div>
+      <div class="shot"><picture><source srcset="assets/shots/markdown-dark.webp" media="(prefers-color-scheme: dark)"><img src="assets/shots/markdown.webp" alt="Markdown source on the left with a live preview on the right" width="1600" height="1006" loading="lazy"></picture></div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="feature">
+      <div class="copy">
+        <p class="kicker">History</p>
+        <h2>Nothing gets lost.</h2>
+        <p>Edith saves versions as you work. Compare any version with the current text line by line, copy from it, or restore it.</p>
+        <p>Autosave writes into the same file. Unsaved work survives a crash. And if another app changes the file while it is open, Edith asks before overwriting.</p>
+      </div>
+      <div class="shot"><picture><source srcset="assets/shots/history-dark.webp" media="(prefers-color-scheme: dark)"><img src="assets/shots/history.webp" alt="Comparing an earlier version with the current text, with the changed line highlighted" width="1600" height="1006" loading="lazy"></picture></div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div style="text-align:center">
+      <p class="kicker">And the details</p>
+      <h2>Made for the way you actually work.</h2>
+    </div>
+    <div class="grid">
+      <div class="cell"><h3>Tabs and Home</h3><p>Keep several documents open. Home shows your recent files with a preview of each.</p></div>
+      <div class="cell"><h3>Scratch from clipboard</h3><p>Press <kbd>⇧⌘N</kbd> to open whatever you copied as a document, tidy it, and copy it back.</p></div>
+      <div class="cell"><h3>Word and PDF in</h3><p>Open a Word, PDF, HTML or RTF file and it is converted to Markdown on your Mac.</p></div>
+      <div class="cell"><h3>Outline</h3><p>Every heading in the sidebar. Click one to jump straight there.</p></div>
+      <div class="cell"><h3>Find and replace</h3><p>Matches highlight as you type, and Replace all undoes in one step.</p></div>
+      <div class="cell"><h3>Focus mode</h3><p><kbd>⇧⌘F</kbd> hides everything but the page.</p></div>
+      <div class="cell"><h3>Seven themes</h3><p>Warm paper by default, Dusk for evenings, and five more.</p></div>
+      <div class="cell"><h3>Images stay tidy</h3><p>Pasted images are saved in a folder beside your document, not crammed into the text.</p></div>
+      <div class="cell"><h3>Keyboard first</h3><p>Shortcuts for headings, lists, notes, versions and modes, with a cheat sheet on <kbd>⌘/</kbd>.</p></div>
+    </div>
+  </section>
+
+  <section id="privacy" class="wrap">
+    <div class="privacy">
+      <div>
+        <p class="kicker">Privacy</p>
+        <h2>Your documents stay on your Mac.</h2>
+        <p class="lead">Edith is a local app. You decide what goes into an AI chat, because you paste it there yourself.</p>
+      </div>
+      <div>
+        <ul class="checks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>No account and no sign-in</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>No analytics or tracking</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>No AI service built in</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>Files, notes and history live on your Mac</li>
+        </ul>
+        <p class="fine">Edith makes one network request: it asks GitHub whether a newer version exists. Its fonts are built in, and pictures linked from the web are not loaded. It never installs anything by itself.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="download" class="wrap download">
+    <p class="kicker">Download</p>
+    <h2>Get Edith. It is free.</h2>
+    <div class="dl-card">
+      <div class="dl-top">
+        <img src="assets/icon-256.png" alt="" width="72" height="72">
+        <div class="t"><b>Edith 3.7.3</b><span>macOS 13 or later · Apple Silicon (M1 and newer)</span></div>
+        <a class="btn btn-primary" href="https://github.com/Dylan-Ashton/edith/releases/latest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Download for Mac</a>
+      </div>
+      <ol class="steps">
+        <li><span>Open the release page and download <b>Edith (Apple Silicon).zip</b>, then double-click it to unzip.</span></li>
+        <li><span>Double-click <b>Install Edith</b>. It copies Edith into Applications and opens it.</span></li>
+        <li><span>If macOS says it cannot verify the installer, open <b>System Settings → Privacy &amp; Security</b>, click <b>Open Anyway</b>, and double-click it again. You only do this once.</span></li>
+      </ol>
+    </div>
+    <p class="new"><b>New in 3.7:</b> Undo now covers notes. Copy as prompt works with any AI chat. Switching between Write and Markdown is smooth. <a href="https://github.com/Dylan-Ashton/edith/blob/main/CHANGELOG.md">Full changelog</a></p>
+  </section>
+
+  <section id="faq" class="wrap">
+    <div style="text-align:center"><p class="kicker">FAQ</p><h2>Questions</h2></div>
+    <div class="faq">
+      <details><summary>Is Edith really free?</summary><p>Yes. No trial, no account, no subscription. It is open source under the MIT license; the code is <a href="https://github.com/Dylan-Ashton/edith">on GitHub</a>.</p></details>
+      <details><summary>Which Macs does it run on?</summary><p>Macs with Apple Silicon (M1 or newer) running macOS 13 Ventura or later. Intel Macs are not supported.</p></details>
+      <details><summary>Why does macOS warn me when I install it?</summary><p>Edith is not yet notarized by Apple, so macOS asks you to confirm the first time. Open System Settings → Privacy &amp; Security and click Open Anyway. After that it opens like any other app.</p></details>
+      <details><summary>Does Edith change my Markdown?</summary><p>It saves standard Markdown back into the same file. Notes are kept by Edith, not written into the file. If you want them in a file, use <b>Save a .md Copy with Notes</b>.</p></details>
+      <details><summary>Does it send my documents anywhere?</summary><p>No. Opening, converting and editing all happen on your Mac. Edith's only network request is the update check, which asks GitHub whether a newer version exists. Images linked from the web are not loaded, so Edith never contacts other sites. Images stored on your Mac are shown.</p></details>
+      <details><summary>How well does it handle Word and PDF?</summary><p>Text, headings and lists convert well. PDF tables and images are not rebuilt, and scanned PDFs cannot be converted.</p></details>
+      <details><summary>How do I update?</summary><p>Edith checks for new versions when it opens and tells you when one is ready. Download it and run the installer again. Your settings, history and open tabs carry over.</p></details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top" style="font-size:18px"><img src="assets/icon-256.png" alt="" width="24" height="24" style="width:24px;height:24px">edith</a>
+    <span>Made by Dylan Ricci</span>
+    <div class="r">
+      <a href="https://github.com/Dylan-Ashton/edith/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/Dylan-Ashton/edith">GitHub</a>
+      <a href="https://github.com/Dylan-Ashton/edith/issues">Report an issue</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Show the demo video once assets/demo.mp4 exists.
+(function () {
+  try {
+    fetch('assets/demo.mp4', { method: 'HEAD' }).then(function (r) {
+      if (!r.ok) return;
+      var v = document.getElementById('demoVideo');
+      v.src = 'assets/demo.mp4';
+      document.getElementById('demo').classList.add('on');
+      var s = document.getElementById('seeHow');
+      s.href = '#demo'; s.textContent = 'Watch the 80-second demo';
+    }).catch(function () {});
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

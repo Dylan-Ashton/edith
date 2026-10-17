@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest something Edith should do.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the task or the moment where Edith gets in your way.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+      description: How you imagine it working. Rough is fine.
+    validations:
+      required: true
+  - type: input
+    id: edith-version
+    attributes:
+      label: Edith version
+      description: Edith menu → About Edith (optional).

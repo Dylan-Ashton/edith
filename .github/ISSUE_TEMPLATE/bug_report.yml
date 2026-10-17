@@ -1,0 +1,44 @@
+name: Bug report
+description: Something in Edith doesn't work the way it should.
+labels: [bug]
+body:
+  - type: input
+    id: edith-version
+    attributes:
+      label: Edith version
+      description: Edith menu → About Edith.
+      placeholder: "3.7.3"
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version
+      description: Apple menu → About This Mac.
+      placeholder: "macOS 15.5"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What did you do, step by step? If it depends on a file, say what kind (Markdown, Word, PDF…) and attach a small example if you can share one.
+      placeholder: |
+        1. Open a .md file with a table
+        2. Switch to Markdown mode
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Screenshots help.
+    validations:
+      required: true

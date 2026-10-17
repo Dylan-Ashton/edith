@@ -1,0 +1,32 @@
+# Builds the Mac app when a release tag (like v3.5.0) is pushed, and attaches the zip to the release.
+name: Build Edith
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: macos-14   # Apple Silicon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+        env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1' }
+      - run: npm run package
+      - name: Check the app and make the zip
+        run: scripts/mac-zip.sh
+      - name: Check the zip opens (unzip -t, ditto, bsdtar, Archive Utility)
+        run: scripts/check-mac-zip.sh "out/Edith (Apple Silicon).zip"
+      - name: Publish
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/Edith (Apple Silicon).zip
+          generate_release_notes: true
+      - name: Keep the zip for manual runs
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with: { name: edith-mac, path: out/Edith (Apple Silicon).zip }

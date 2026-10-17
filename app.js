@@ -4555,10 +4555,25 @@
       await native.seedAllowed(list.filter((p) => typeof p === "string" && p.charAt(0) === "/"));
     } catch (e) {}
   }
+  // A theme's fonts are bundled but only decoded on first use, so the first switch to a theme drew the page in a
+  // fallback font and then reflowed it. Once the window is idle after startup, load every face, one per idle moment.
+  function preloadFonts() {
+    const idle = window.requestIdleCallback || ((f) => setTimeout(f, 50));
+    const faces = [...document.fonts].filter((f) => f.status === "unloaded");
+    const next = () => {
+      const f = faces.shift();
+      if (f)
+        f.load()
+          .catch(() => {})
+          .then(() => idle(next));
+    };
+    idle(next);
+  }
   seedAllowedFiles()
     .then(restoreSession)
     .then(() => {
       fitToolbar();
       pushRecentToMenu();
+      setTimeout(preloadFonts, 1500);
     });
 })();

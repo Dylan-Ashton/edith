@@ -309,7 +309,8 @@
     .menu:not([hidden]) { animation: fadeIn .14s ease-out; }
     .modal.on .card { animation: cardIn .18s ease-out; }
     .bubble:not([hidden]) { animation: fadeIn .12s ease-out; }
-    .tab { transition: background .15s ease, color .15s ease, transform .15s ease; }
+    .tab { transition: background .15s ease, color .15s ease, transform .15s ease, box-shadow .15s ease; }
+    .tab:not(.active):hover { transform: translateY(-1px); }
     .start:not([hidden]) .start-card { animation: cardIn .25s ease-out; }
   }
   .recent-row { display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
@@ -335,7 +336,7 @@
   .tab .x:hover { background: var(--line); color: var(--ink); }
   .tab.dirty:not(:hover) .x { opacity: 0; }
   .tab.dirty:hover .d { display: none; }
-  .tab:not(.active):hover { background: color-mix(in srgb, var(--ink) 7%, var(--surface-2)); color: var(--ink); transform: translateY(-1px); }
+  .tab:not(.active):hover { background: color-mix(in srgb, var(--ink) 7%, var(--surface-2)); color: var(--ink); }
   .tab.active { background: var(--surface); color: var(--ink); border-color: var(--line); }
   .tab.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--surface); }
   .tab.dragging { opacity: .5; }
@@ -427,6 +428,10 @@
   .menu button.on:hover { background: color-mix(in srgb, var(--accent) 22%, var(--accent-soft)); }
   .tab.active:hover { background: color-mix(in srgb, var(--ink) 3%, var(--surface)); }
   .tab:not(.active):hover { background: color-mix(in srgb, var(--ink) 12%, var(--surface-2)); }
+  /* the open tab stays joined to the toolbar, so its hover is an accent line along the top; on Home no tab is open, so every tab tints */
+  .tab.active:hover { box-shadow: inset 0 2px 0 color-mix(in srgb, var(--accent) 65%, transparent); }
+  body.home .tabstrip .tab.active:hover { background: color-mix(in srgb, var(--ink) 12%, var(--surface-2)); color: var(--ink); box-shadow: none; }
+  .tab-home.active:hover { background: color-mix(in srgb, var(--ink) 6%, var(--surface)); }
   .tb-btn.primary:hover { filter: brightness(1.12); box-shadow: 0 1px 6px rgba(0,0,0,.18); }
   .tb-btn.primary:active { filter: brightness(.94); }
   .tb-btn:active:not(.primary) { background: var(--line); }

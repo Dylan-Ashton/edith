@@ -1,0 +1,50 @@
+# Publishes the website: docs/ plus the try-it demo at demo/ (scripts/site.sh), on every push to main and by hand.
+# It only deploys once Settings → Pages → Source is "GitHub Actions". Until then it builds, says so, and leaves the
+# site as it is (served from main /docs), so the order of merging and switching does not matter.
+name: Website
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      deploy: ${{ steps.source.outputs.deploy }}
+    steps:
+      - name: Check the Pages source
+        id: source
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          t=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type 2>/dev/null || echo unknown)
+          echo "Pages source: $t"
+          if [ "$t" = workflow ]; then echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::Pages is not set to deploy from GitHub Actions yet (Settings → Pages → Source), so the site stays as it is."; fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+        env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1', ELECTRON_SKIP_BINARY_DOWNLOAD: '1' }
+      - run: npm run build
+      - run: scripts/site.sh
+      - if: steps.source.outputs.deploy == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with: { path: _site }
+  deploy:
+    needs: build
+    if: needs.build.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -33,7 +33,7 @@
       return false;
     }
   }
-  const APP_VERSION = "3.7.4";
+  const APP_VERSION = "3.7.5";
   const DEFAULTS = {
     width: "normal",
     seenVersion: "",
@@ -727,6 +727,7 @@
     return tab;
   }
   async function closeTab(tab) {
+    if (!tab) return false; // ⌘W on Home with no tabs open
     if (tab.dirty && !isScratch(tab)) {
       await flushTab(tab);
       if (tab.dirty) {
@@ -750,6 +751,11 @@
         }
       }
     }
+    // a closed tab's pending change, draft and version timers would otherwise run against the next tab, or none
+    Object.keys(tab.timers).forEach((k) => {
+      clearTimeout(tab.timers[k]);
+      tab.timers[k] = null;
+    });
     const i = tabs.indexOf(tab);
     tabs.splice(i, 1);
     try {

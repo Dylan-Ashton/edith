@@ -1,3 +1,8 @@
+## 3.7.5
+- New on the website: try Edith in your browser before you install it.
+- Fixed: closing a long document right after switching between Write and Markdown could leave Edith finishing work for a tab that was already closed.
+- Fixed: Close Tab (⌘W) on Home with no documents open caused an error. It now does nothing.
+
 ## 3.7.4
 - Remove a document from Recent: hover over its card on Home (or move to it with Tab) and click the **×**. It also leaves File → Open Recent. The file itself is not touched.
 - Opening a recent document from Home now fades the page in, briefly. With Reduce Motion on, it appears at once.

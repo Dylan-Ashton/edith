@@ -20,7 +20,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Edith","operatingSystem":"macOS 13 or later (Apple Silicon)","applicationCategory":"ProductivityApplication","softwareVersion":"3.7.4","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A Mac app for reading and revising Markdown files as ordinary documents.","url":"https://dylan-ashton.github.io/edith/","author":{"@type":"Person","name":"Dylan Ricci"}}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Edith","operatingSystem":"macOS 13 or later (Apple Silicon)","applicationCategory":"ProductivityApplication","softwareVersion":"3.7.5","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A Mac app for reading and revising Markdown files as ordinary documents.","url":"https://dylan-ashton.github.io/edith/","author":{"@type":"Person","name":"Dylan Ricci"}}
 </script>
 <style>
 @font-face{font-family:"Plex";src:url(assets/fonts/IBMPlexSans-Regular.woff) format("woff");font-weight:400;font-display:swap}
@@ -61,6 +61,7 @@ a{color:var(--moss);text-underline-offset:3px}
 .btn-primary:active{transform:translateY(1px)}
 .btn-quiet{color:var(--ink);border-color:var(--line);background:var(--card)}
 .btn-quiet:hover{border-color:var(--moss)}
+.btn[hidden]{display:none}
 .btn-sm{padding:8px 14px;font-size:14px;border-radius:8px}
 .btn svg{width:18px;height:18px;flex:none}
 
@@ -192,8 +193,9 @@ footer .r{margin-left:auto;display:flex;gap:22px;flex-wrap:wrap}
     <div class="cta">
       <a class="btn btn-primary" href="#download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Download for Mac</a>
       <a class="btn btn-quiet" id="seeHow" href="#features">See how it works</a>
+      <a class="btn btn-quiet" id="tryDemo" href="demo/" hidden>Try it in your browser</a>
     </div>
-    <p class="meta">Version 3.7.4 · macOS 13 or later · Apple Silicon</p>
+    <p class="meta">Version 3.7.5 · macOS 13 or later · Apple Silicon</p>
     <div class="shot">
       <picture>
         <source srcset="assets/shots/write-dark.webp" media="(prefers-color-scheme: dark)">
@@ -319,7 +321,7 @@ Leave everything I have not commented on as it is. Number your replies to match 
     <div class="dl-card">
       <div class="dl-top">
         <img src="assets/icon-256.png" alt="" width="72" height="72">
-        <div class="t"><b>Edith 3.7.4</b><span>macOS 13 or later · Apple Silicon (M1 and newer)</span></div>
+        <div class="t"><b>Edith 3.7.5</b><span>macOS 13 or later · Apple Silicon (M1 and newer)</span></div>
         <a class="btn btn-primary" href="https://github.com/Dylan-Ashton/edith/releases/latest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Download for Mac</a>
       </div>
       <ol class="steps">
@@ -368,6 +370,16 @@ Leave everything I have not commented on as it is. Number your replies to match 
       document.getElementById('demo').classList.add('on');
       var s = document.getElementById('seeHow');
       s.href = '#demo'; s.textContent = 'Watch the 80-second demo';
+    }).catch(function () {});
+  } catch (e) {}
+})();
+// Offer the in-browser demo (built into demo/ by scripts/site.sh) once it is deployed, on computers only:
+// Edith is a desktop app and the demo is a 4.6 MB page.
+(function () {
+  try {
+    if (!matchMedia('(pointer: fine) and (min-width: 900px)').matches) return;
+    fetch('demo/', { method: 'HEAD' }).then(function (r) {
+      if (r.ok) document.getElementById('tryDemo').hidden = false;
     }).catch(function () {});
   } catch (e) {}
 })();

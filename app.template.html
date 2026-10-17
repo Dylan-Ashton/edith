@@ -533,6 +533,9 @@
   .tabstrip { -webkit-app-region: drag; }
   .tabstrip button, .tabstrip .tab, .tabstrip .tab * { -webkit-app-region: no-drag; }
   body.native .browser-only { display: none !important; }
+  .demo-bar { display: none; }
+  html[data-demo] .demo-bar { display: block; flex: none; padding: 7px 16px; text-align: center; font-size: 12.5px; background: var(--accent-soft); color: var(--ink); border-bottom: 1px solid var(--line); }
+  .demo-bar a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
   body.native .topbar .wordmark { display: none; }
   .tabstrip .wordmark { align-self: center; margin: 0 14px 0 8px; }
   body.native .tabstrip .wordmark { display: none; }
@@ -547,6 +550,8 @@
 </head>
 <body>
 
+<!-- Only on the website's try-it page (scripts/site.sh marks it <html data-demo>); hidden everywhere else -->
+<div class="demo-bar" role="note">This is Edith running in your browser. What you type stays in this browser. <a href="../#download" target="_top">Get Edith for Mac</a> to open and save your own files.</div>
 <div class="tabstrip" id="tabstrip"><button class="tab-home" id="btnHome" title="Home (⇧⌘H)"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg></button><span class="wordmark" id="wordmark" aria-label="Edith">edith</span><div class="tabs-scroll" id="tabsScroll"></div><button class="tab-add" id="tabAdd" title="New tab (⌘T)">+</button></div>
 <header class="topbar" id="topbar">
   <button class="tb-btn" id="btnSide" title="Show or hide the sidebar (⌘\)">

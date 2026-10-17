@@ -367,7 +367,7 @@
   .start { position: absolute; inset: 0; z-index: 10; display: flex; align-items: flex-start; justify-content: center; overflow: auto; padding: 7vh 32px 40px; background: var(--surface); }
   .start-logo { display: block; margin: 0 auto 22px; border-radius: 27px; box-shadow: 0 12px 32px rgba(60,50,30,.18); }
   .recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
-  .rcard { text-align: left; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; transition: transform .12s, box-shadow .12s; }
+  .rcard { text-align: left; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
   .rcard:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(60,50,30,.12); border-color: var(--accent-soft); }
   .rcard .thumb { height: 118px; background: var(--surface-2); padding: 14px 14px 0; overflow: hidden; position: relative; }
   .rcard .thumb::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(transparent, var(--surface-2)); }
@@ -384,7 +384,13 @@
   .rcard-x:hover { color: var(--ink); background: var(--surface-2); }
   .rcard-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .rcard-wrap:hover .rcard-x { transform: translateY(-2px); }
-  @media (prefers-reduced-motion: no-preference) { .rcard-x { transition: opacity .12s, transform .12s; } }
+  @media (prefers-reduced-motion: no-preference) {
+    .rcard { transition: transform .12s, box-shadow .12s; }
+    .rcard-x { transition: opacity .12s, transform .12s; }
+    /* opening a recent document from Home: the editor fades in and rises a little as Home goes */
+    body.reveal:not(.home) .tabview:not([hidden]) { animation: docIn .18s cubic-bezier(.2, .7, .3, 1) both; }
+  }
+  @keyframes docIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   .start .hint { margin-top: 28px; }
   .start[hidden] { display: none !important; }
   body.home .tabview { visibility: hidden; }

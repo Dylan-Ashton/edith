@@ -521,6 +521,19 @@
     }
   }
   const RECENT_CARDS = 6;
+  // the editor fades in as Home goes (CSS: body.reveal); the class is dropped once that has played
+  function revealFromHome() {
+    if (reduceMotion()) return;
+    const host = $("editorHost");
+    const done = (e) => {
+      if (e && e.animationName !== "docIn") return;
+      document.body.classList.remove("reveal");
+      host.removeEventListener("animationend", done);
+    };
+    document.body.classList.add("reveal");
+    host.addEventListener("animationend", done);
+    setTimeout(done, 1500);
+  }
   async function recentCard(r) {
     const card = document.createElement("button");
     card.className = "rcard";
@@ -548,6 +561,7 @@
     card.querySelector(".d").textContent = relTime(r.at);
     card.addEventListener("click", async () => {
       if (r.path || r.handle) {
+        revealFromHome();
         try {
           await openFromRef(r.path ? { path: r.path } : { handle: r.handle });
         } catch (e) {

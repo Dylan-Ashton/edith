@@ -1,6 +1,7 @@
-// The website's try-it demo: scripts/site.sh builds _site/ with the app at demo/; the site offers "Try it in your
-// browser" on computers once demo/ exists; the demo shows its bar, opens on the welcome document, edits, and makes
-// no request beyond its own page. The app itself never shows the demo bar.
+// The website's "Try it" window (docs/index.html #try, site/try.js): scripts/site.sh builds it; the page shows a
+// read-only example that turns into Edith's editor near the screen without changing what is shown; toolbar,
+// typing shortcuts, checkboxes, links and Start over update the Markdown pane; nothing is requested from elsewhere;
+// without the bundle (docs/ served as is) the example stays and nothing breaks; on a phone the toolbar fits.
 import { chromium } from 'playwright';
 import { spawnSync } from 'child_process';
 import http from 'http';
@@ -8,8 +9,8 @@ import fs from 'fs';
 import path from 'path';
 const ok = (n, v) => console.log((v ? 'PASS ' : 'FAIL ') + n);
 const r = spawnSync('bash', ['scripts/site.sh'], { encoding: 'utf8' });
-ok('scripts/site.sh builds the site', r.status === 0 && fs.existsSync('_site/demo/index.html') && fs.existsSync('_site/index.html'));
-const types = { '.html': 'text/html', '.webp': 'image/webp', '.png': 'image/png', '.woff': 'font/woff', '.mp4': 'video/mp4' };
+ok('scripts/site.sh builds the site and the editor bundle', r.status === 0 && fs.existsSync('_site/assets/try.js') && fs.existsSync('_site/assets/try.css'));
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.png': 'image/png', '.woff': 'font/woff' };
 const serve = (root) => new Promise((res) => {
   const s = http.createServer((q, a) => {
     let f = path.join(root, decodeURIComponent(new URL(q.url, 'http://x').pathname));
@@ -21,26 +22,68 @@ const serve = (root) => new Promise((res) => {
 const site = await serve(path.resolve('_site')), bare = await serve(path.resolve('docs'));
 const base = `http://127.0.0.1:${site.address().port}/`;
 const b = await chromium.launch(); const errs = [];
-const tryShown = async (ctxOpts, url) => { const c = await b.newContext(ctxOpts); const p = await c.newPage(); await p.goto(url); await p.waitForTimeout(700); const v = await p.isVisible('#tryDemo'); await c.close(); return v; };
-ok('site offers the demo on a computer', await tryShown({ viewport: { width: 1280, height: 800 } }, base));
-ok('site does not offer it on a phone', !(await tryShown({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, base)));
-ok('site does not offer it while demo/ is not deployed', !(await tryShown({ viewport: { width: 1280, height: 800 } }, `http://127.0.0.1:${bare.address().port}/`)));
-// the demo itself
-const c = await b.newContext({ viewport: { width: 1280, height: 800 } }); const p = await c.newPage(); p.on('pageerror', (e) => errs.push(e.message));
-await p.goto(base); await p.waitForTimeout(700);
+// reduced motion: the site scrolls smoothly otherwise, and the mouse would click a moving page
+const c = await b.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' }); const p = await c.newPage(); p.on('pageerror', (e) => errs.push(e.message));
 const reqs = []; p.on('request', (q) => reqs.push(q.url()));
-await p.click('#tryDemo'); await p.waitForURL(base + 'demo/'); await p.waitForTimeout(1500);
-ok('demo shows the browser bar', await p.isVisible('.demo-bar'));
-ok('demo bar links to the download', (await p.getAttribute('.demo-bar a', 'href')) === '../#download');
-ok('demo opens on the welcome document', /Welcome to Edith/.test(await p.textContent('.tabview:not([hidden]) .ProseMirror h1')));
-await p.click('.tabview:not([hidden]) .toastui-editor-ww-container .ProseMirror h1'); await p.keyboard.press('End'); await p.keyboard.type(' (demo)'); await p.waitForTimeout(700);
-ok('demo edits', /Welcome to Edith \(demo\)/.test(await p.textContent('.tabview:not([hidden]) .ProseMirror h1')));
-const other = reqs.filter((u) => !/^(data|blob):/.test(u) && u !== base + 'demo/');
-ok('demo makes no request beyond its own page' + (other.length ? ' ' + other.join(' ') : ''), other.length === 0);
-await p.click('.demo-bar a'); await p.waitForURL(base + '#download');
-ok('the link goes back to the download section', p.url() === base + '#download');
-// the app (Mac app and plain dist.html) never shows the bar
-await p.goto('file://' + process.cwd() + '/dist.html'); await p.waitForTimeout(800);
-ok('the app itself has no demo bar', !(await p.isVisible('.demo-bar')));
+await p.goto(base); await p.waitForTimeout(500);
+const md = () => p.textContent('#try .try-md pre');
+// the pane updates on the next frame; give a slow machine up to 3 s before judging it
+const mdMatches = async (test) => { for (let i = 0; i < 30; i++) { if (test(await md())) return true; await p.waitForTimeout(100); } console.log('  Markdown was: ' + JSON.stringify(await md())); return false; };
+const staticMd = await md(), staticDoc = await p.textContent('#try .try-doc');
+ok('the example is there before the editor loads', /Weekend plan/.test(staticDoc) && /^# Weekend plan\n/.test(staticMd) && !(await p.evaluate(() => document.getElementById('try').classList.contains('live'))));
+ok('the editor is not loaded at the top of the page', !reqs.some((u) => u.includes('assets/try.')));
+await p.evaluate(() => document.getElementById('try').scrollIntoView({ block: 'center' }));
+for (let i = 0; i < 40 && !(await p.evaluate(() => document.getElementById('try').classList.contains('live'))); i++) await p.waitForTimeout(100);
+ok('the window becomes live near the screen', await p.evaluate(() => document.getElementById('try').classList.contains('live')));
+ok('going live changes neither side', (await md()) === staticMd && (await p.textContent('#try .try-doc')).replace(/\s+/g, ' ').includes('Weekend plan Write here like any document'));
+const pm = '#try .toastui-editor-ww-container .ProseMirror';
+// put the caret after `text`, or select it, the way a person does: with the mouse
+const place = async (text, atEnd) => {
+  const r = await p.evaluate(([s, t]) => { const root = document.querySelector(s); const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const i = n.data.indexOf(t); if (i >= 0) { n.parentElement.scrollIntoView({ block: 'center' }); const rg = document.createRange(); rg.setStart(n, i); rg.setEnd(n, i + 1); const a = rg.getBoundingClientRect(); rg.setStart(n, i + t.length - 1); rg.setEnd(n, i + t.length); const z = rg.getBoundingClientRect(); return { x1: a.left + 1, x2: z.right - 0.5, y1: a.top + a.height / 2, y2: z.top + z.height / 2 }; } } return null; }, [pm, text]);
+  if (!r) return false;
+  if (atEnd) await p.mouse.click(r.x2, r.y2);
+  else { await p.mouse.move(r.x1, r.y1); await p.mouse.down(); await p.mouse.move(r.x2, r.y2, { steps: 4 }); await p.mouse.up(); }
+  await p.waitForTimeout(60);
+  return true;
+};
+// typing
+await place('for a heading.', true); await p.keyboard.type(' Hello there');
+ok('typing shows up in the Markdown', await mdMatches((m) => m.includes('for a heading. Hello there')));
+// bold from the toolbar, and the button shows it
+await place('Hello'); await p.click('#try [data-cmd=bold]');
+ok('Bold wraps the selection in **', await mdMatches((m) => m.includes('**Hello** there')));
+ok('Bold shows as on', (await p.getAttribute('#try [data-cmd=bold]', 'aria-pressed')) === 'true');
+// typing shortcut for a heading
+await place(' there', true); await p.keyboard.press('Enter'); await p.keyboard.type('## Notes');
+ok('"## " starts a heading, as in Edith', (await mdMatches((m) => /\n## Notes\n/.test(m))) && (await p.inputValue('#try select')) === '2');
+// paragraph style menu
+await place('Notes', true); await p.selectOption('#try select', '0');
+ok('Normal text turns the heading back into a paragraph', await mdMatches((m) => /\nNotes\n/.test(m) && !/## Notes/.test(m)));
+// a checkbox click
+const box = await p.evaluate(() => { const li = [...document.querySelectorAll('#try .ProseMirror li.task-list-item')].find((l) => l.textContent.trim() === 'Charger'); const r = li.getBoundingClientRect(); return { x: r.left + 8, y: r.top + 12 }; });
+await p.mouse.click(box.x, box.y);
+ok('clicking a checkbox ticks it in the Markdown', await mdMatches((m) => m.includes('- [x] Charger')));
+// a link through the small field
+await place('old harbor'); await p.click('#try [data-cmd=link]');
+ok('Link opens the address field', await p.isVisible('#try .try-link input'));
+await p.fill('#try .try-link input', 'example.org/harbor'); await p.keyboard.press('Enter');
+ok('the link lands in the Markdown', (await mdMatches((m) => m.includes('[old harbor](https://example.org/harbor)'))) && !(await p.isVisible('#try .try-link')));
+// lists from the toolbar: a new line after the title
+await place('Weekend plan', true); await p.keyboard.press('Enter'); await p.keyboard.type('first'); await p.click('#try [data-cmd=orderedList]');
+ok('Numbered list from the toolbar', await mdMatches((m) => /^# Weekend plan\n\n1\. first\n/.test(m)));
+// start over
+await p.click('#try .try-reset');
+ok('Start over puts the example back', await mdMatches((m) => m === staticMd));
+const other = reqs.filter((u) => !u.startsWith(base) && !/^(data|blob):/.test(u));
+ok('nothing is requested from anywhere else' + (other.length ? ' ' + other.join(' ') : ''), other.length === 0);
+// docs/ served without the bundle (e.g. Pages not deploying from Actions): the example stays, no errors
+const p2 = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage(); p2.on('pageerror', (e) => errs.push(e.message));
+await p2.goto(`http://127.0.0.1:${bare.address().port}/#features`); await p2.waitForTimeout(1200);
+ok('without the bundle the example still shows', /Weekend plan/.test(await p2.textContent('#try .try-doc')) && !(await p2.evaluate(() => document.getElementById('try').classList.contains('live'))));
+// phone: every control is reachable without sideways scrolling
+const p3 = await (await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })).newPage(); p3.on('pageerror', (e) => errs.push(e.message));
+await p3.goto(base + '#features'); await p3.waitForTimeout(1500);
+ok('on a phone the toolbar fits', await p3.evaluate(() => [...document.querySelectorAll('#try .try-bar > button, #try .try-bar > select')].every((e) => { const r = e.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; })));
+ok('on a phone the page does not scroll sideways', await p3.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 ok('no page errors', errs.length === 0); if (errs.length) console.log(errs);
 await b.close(); site.close(); bare.close();

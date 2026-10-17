@@ -1,4 +1,4 @@
-# Publishes the website: docs/ plus the try-it demo at demo/ (scripts/site.sh), on every push to main and by hand.
+# Publishes the website: docs/ plus the "Try it" editor bundle (scripts/site.sh), on every push to main and by hand.
 # It only deploys once Settings → Pages → Source is "GitHub Actions". Until then it builds, says so, and leaves the
 # site as it is (served from main /docs), so the order of merging and switching does not matter.
 name: Website
@@ -33,7 +33,6 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
         env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1', ELECTRON_SKIP_BINARY_DOWNLOAD: '1' }
-      - run: npm run build
       - run: scripts/site.sh
       - if: steps.source.outputs.deploy == 'true'
         uses: actions/upload-pages-artifact@v4

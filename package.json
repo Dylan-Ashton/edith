@@ -1,12 +1,12 @@
 {
   "name": "edith",
   "private": true,
-  "version": "3.7.4",
+  "version": "3.7.5",
   "description": "Edith — a local Mac Markdown editor. Run `npm install` then `npm run build`.",
   "scripts": {
     "bundle": "esbuild entry.js --bundle --minify --format=iife --outfile=vendor.min.js",
     "build": "npm run bundle && python3 build.py && cp dist.html electron-app/index.html",
-    "package": "npm run build && electron-packager electron-app Edith --platform=darwin --arch=arm64 --electron-version=44.7.2 --out=build --overwrite --icon=brand/edith.icns --app-bundle-id=app.edith.mac --app-version=3.7.4 --extend-info=extend.plist",
+    "package": "npm run build && electron-packager electron-app Edith --platform=darwin --arch=arm64 --electron-version=44.7.2 --out=build --overwrite --icon=brand/edith.icns --app-bundle-id=app.edith.mac --app-version=3.7.5 --extend-info=extend.plist",
     "dev": "npm run build && electron electron-app",
     "test": "node tests/run.mjs",
     "test:electron": "node tests/run.mjs electron",

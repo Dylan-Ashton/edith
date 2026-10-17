@@ -27,6 +27,8 @@ const c = await b.newContext({ viewport: { width: 1280, height: 900 }, reducedMo
 const reqs = []; p.on('request', (q) => reqs.push(q.url()));
 await p.goto(base); await p.waitForTimeout(500);
 const md = () => p.textContent('#try .try-md pre');
+// the pane updates on the next frame; give a slow machine up to 3 s before judging it
+const mdMatches = async (test) => { for (let i = 0; i < 30; i++) { if (test(await md())) return true; await p.waitForTimeout(100); } console.log('  Markdown was: ' + JSON.stringify(await md())); return false; };
 const staticMd = await md(), staticDoc = await p.textContent('#try .try-doc');
 ok('the example is there before the editor loads', /Weekend plan/.test(staticDoc) && /^# Weekend plan\n/.test(staticMd) && !(await p.evaluate(() => document.getElementById('try').classList.contains('live'))));
 ok('the editor is not loaded at the top of the page', !reqs.some((u) => u.includes('assets/try.')));
@@ -46,34 +48,32 @@ const place = async (text, atEnd) => {
 };
 // typing
 await place('for a heading.', true); await p.keyboard.type(' Hello there');
-await p.waitForTimeout(100);
-ok('typing shows up in the Markdown', (await md()).includes('for a heading. Hello there'));
+ok('typing shows up in the Markdown', await mdMatches((m) => m.includes('for a heading. Hello there')));
 // bold from the toolbar, and the button shows it
-await place('Hello'); await p.click('#try [data-cmd=bold]'); await p.waitForTimeout(100);
-ok('Bold wraps the selection in **', (await md()).includes('**Hello** there'));
+await place('Hello'); await p.click('#try [data-cmd=bold]');
+ok('Bold wraps the selection in **', await mdMatches((m) => m.includes('**Hello** there')));
 ok('Bold shows as on', (await p.getAttribute('#try [data-cmd=bold]', 'aria-pressed')) === 'true');
 // typing shortcut for a heading
-await place(' there', true); await p.keyboard.press('Enter'); await p.keyboard.type('## Notes'); await p.waitForTimeout(100);
-ok('"## " starts a heading, as in Edith', /\n## Notes\n/.test(await md()) && (await p.inputValue('#try select')) === '2');
+await place(' there', true); await p.keyboard.press('Enter'); await p.keyboard.type('## Notes');
+ok('"## " starts a heading, as in Edith', (await mdMatches((m) => /\n## Notes\n/.test(m))) && (await p.inputValue('#try select')) === '2');
 // paragraph style menu
-await place('Notes', true); await p.selectOption('#try select', '0'); await p.waitForTimeout(100);
-ok('Normal text turns the heading back into a paragraph', /\nNotes\n/.test(await md()) && !/## Notes/.test(await md()));
+await place('Notes', true); await p.selectOption('#try select', '0');
+ok('Normal text turns the heading back into a paragraph', await mdMatches((m) => /\nNotes\n/.test(m) && !/## Notes/.test(m)));
 // a checkbox click
 const box = await p.evaluate(() => { const li = [...document.querySelectorAll('#try .ProseMirror li.task-list-item')].find((l) => l.textContent.trim() === 'Charger'); const r = li.getBoundingClientRect(); return { x: r.left + 8, y: r.top + 12 }; });
-await p.mouse.click(box.x, box.y); await p.waitForTimeout(100);
-ok('clicking a checkbox ticks it in the Markdown', (await md()).includes('- [x] Charger'));
+await p.mouse.click(box.x, box.y);
+ok('clicking a checkbox ticks it in the Markdown', await mdMatches((m) => m.includes('- [x] Charger')));
 // a link through the small field
 await place('old harbor'); await p.click('#try [data-cmd=link]');
 ok('Link opens the address field', await p.isVisible('#try .try-link input'));
-await p.fill('#try .try-link input', 'example.org/harbor'); await p.keyboard.press('Enter'); await p.waitForTimeout(100);
-ok('the link lands in the Markdown', (await md()).includes('[old harbor](https://example.org/harbor)') && !(await p.isVisible('#try .try-link')));
-// lists from the toolbar
-await place('Nothing you type here', true); await p.keyboard.press('End'); await p.keyboard.press('Enter'); await p.keyboard.press('Enter');
-await p.keyboard.type('first'); await p.click('#try [data-cmd=orderedList]'); await p.waitForTimeout(100);
-ok('Numbered list from the toolbar', /\n1\. first\n/.test(await md()));
+await p.fill('#try .try-link input', 'example.org/harbor'); await p.keyboard.press('Enter');
+ok('the link lands in the Markdown', (await mdMatches((m) => m.includes('[old harbor](https://example.org/harbor)'))) && !(await p.isVisible('#try .try-link')));
+// lists from the toolbar: a new line after the title
+await place('Weekend plan', true); await p.keyboard.press('Enter'); await p.keyboard.type('first'); await p.click('#try [data-cmd=orderedList]');
+ok('Numbered list from the toolbar', await mdMatches((m) => /^# Weekend plan\n\n1\. first\n/.test(m)));
 // start over
-await p.click('#try .try-reset'); await p.waitForTimeout(150);
-ok('Start over puts the example back', (await md()) === staticMd);
+await p.click('#try .try-reset');
+ok('Start over puts the example back', await mdMatches((m) => m === staticMd));
 const other = reqs.filter((u) => !u.startsWith(base) && !/^(data|blob):/.test(u));
 ok('nothing is requested from anywhere else' + (other.length ? ' ' + other.join(' ') : ''), other.length === 0);
 // docs/ served without the bundle (e.g. Pages not deploying from Actions): the example stays, no errors

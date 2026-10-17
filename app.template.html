@@ -20,7 +20,7 @@
     --ui-font: "IBM Plex Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
     --mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
     --doc-font: "IBM Plex Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
-    --doc-size: 16px; --doc-lh: 1.65; --doc-width: 82ch;
+    --doc-size: 16px; --doc-lh: 1.65; --doc-measure: 82ch; --doc-width: var(--doc-measure);
     --radius: 8px; --glow: none;
     --side: 260px; --mdsplit: 50%;
   }
@@ -51,14 +51,14 @@
     --accent: #7a2e2e; --accent-soft: #f0e0e0; --warn: #8a5a1a; --note: #f6e3a6; --note-ink: #4a3a00;
     --code-bg: #efede4; --sel: #e6d4cf;
     --ui-font: "Source Sans 3", -apple-system, sans-serif; --doc-font: "EB Garamond", Garamond, Georgia, serif;
-    --doc-size: 18px; --doc-lh: 1.6; --doc-width: 76ch; --radius: 3px;
+    --doc-size: 18px; --doc-lh: 1.6; --doc-measure: 76ch; --radius: 3px;
   }
   [data-theme="focused"] {
     --bg: #2a2a2a; --surface: #303030; --surface-2: #363636; --line: #444;
     --ink: #d8d8d8; --ink-2: #9a9a9a; --ink-3: #666;
     --accent: #bdbdbd; --accent-soft: #3f3f3f; --accent-ink: #1a1a1a; --warn: #c9a26a; --note: #4a4a3a; --note-ink: #e6dcb0;
     --code-bg: #262626; --sel: #4a4a4a;
-    --ui-font: "Inter", -apple-system, sans-serif; --doc-font: "Inter", -apple-system, sans-serif; --doc-lh: 1.8; --doc-width: 72ch; --radius: 6px;
+    --ui-font: "Inter", -apple-system, sans-serif; --doc-font: "Inter", -apple-system, sans-serif; --doc-lh: 1.8; --doc-measure: 72ch; --radius: 6px;
   }
   [data-theme="matrix"] {
     --bg: #000; --surface: #040804; --surface-2: #0a140a; --line: #0f3a14;
@@ -213,7 +213,8 @@
   .toastui-editor-ww-container .toastui-editor-contents { padding: 32px max(40px, calc((100% - var(--doc-width)) / 2)) 50vh !important; }
   .toastui-editor-md-preview .toastui-editor-contents { padding: 24px max(28px, calc((100% - var(--doc-width)) / 2)) 50vh !important; }
   .toastui-editor-defaultUI .toastui-editor-md-container .toastui-editor .ProseMirror { padding: 24px max(24px, calc((100% - var(--doc-width)) / 2)) 50vh !important; }
-  .work.w-wide { --doc-width: 110ch; } .work.w-full { --doc-width: 100%; }
+  /* Wide sits halfway between the theme's measure and the full window (capped at 110ch), so it always differs from both when the window has room */
+  .work.w-wide { --doc-width: min(calc((var(--doc-measure) + 100% - 80px) / 2), 110ch); } .work.w-full { --doc-width: 100%; }
   .toastui-editor-contents p { color: var(--ink) !important; margin: 0 0 .8em !important; }
   .toastui-editor-ww-container .toastui-editor-contents p { margin: 0 0 .8em !important; }
   .toastui-editor-contents h1, .toastui-editor-contents h2, .toastui-editor-contents h3, .toastui-editor-contents h4, .toastui-editor-contents h5, .toastui-editor-contents h6 { color: var(--ink) !important; font-family: var(--doc-font); font-weight: 600 !important; line-height: 1.25 !important; margin: 1.5em 0 .5em !important; border: 0 !important; padding: 0 !important; }

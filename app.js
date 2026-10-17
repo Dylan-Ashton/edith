@@ -1004,10 +1004,14 @@
     prefs.size = Math.max(10, Math.min(32, px));
     savePrefs();
     keepPosition(() => document.documentElement.style.setProperty("--doc-size", prefs.size + "px"));
-    $("btnZoom").textContent = Math.round((prefs.size / BASE_SIZE) * 100) + "%";
-    $("zoomVal").textContent = $("btnZoom").textContent;
-    document.querySelectorAll("[data-zoom]").forEach((b) => b.classList.toggle("on", Math.round((BASE_SIZE * b.dataset.zoom) / 100) === prefs.size));
-    if ($("pSizeOut")) $("pSizeOut").textContent = Math.round((prefs.size / BASE_SIZE) * 100) + "%";
+    // a preset shows its own number (115% is 18px, which would otherwise read 113%)
+    const presets = [...document.querySelectorAll("[data-zoom]")];
+    presets.forEach((b) => b.classList.toggle("on", Math.round((BASE_SIZE * b.dataset.zoom) / 100) === prefs.size));
+    const on = presets.find((b) => b.classList.contains("on"));
+    const pct = (on ? on.dataset.zoom : Math.round((prefs.size / BASE_SIZE) * 100)) + "%";
+    $("btnZoom").textContent = pct;
+    $("zoomVal").textContent = pct;
+    if ($("pSizeOut")) $("pSizeOut").textContent = pct;
   }
   bindMenu("btnZoom", "zoomMenu");
   $("zoomMenu").addEventListener("click", (e) => {
@@ -4122,7 +4126,7 @@
     $("pSpell").checked = prefs.spell;
     $("pMode").value = prefs.mode;
     $("pSize").value = prefs.size;
-    $("pSizeOut").textContent = Math.round((prefs.size / BASE_SIZE) * 100) + "%";
+    $("pSizeOut").textContent = $("btnZoom").textContent;
     const ts = $("pTheme");
     ts.innerHTML = "";
     THEMES.forEach((t) => {

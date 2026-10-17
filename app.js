@@ -33,7 +33,7 @@
       return false;
     }
   }
-  const APP_VERSION = "3.7.3";
+  const APP_VERSION = "3.7.4";
   const DEFAULTS = {
     width: "normal",
     seenVersion: "",
@@ -520,6 +520,113 @@
       await saveFile(false, true);
     }
   }
+  const RECENT_CARDS = 6;
+  // the editor fades in as Home goes (CSS: body.reveal); the class is dropped once that has played
+  function revealFromHome() {
+    if (reduceMotion()) return;
+    const host = $("editorHost");
+    const done = (e) => {
+      if (e && e.animationName !== "docIn") return;
+      document.body.classList.remove("reveal");
+      host.removeEventListener("animationend", done);
+    };
+    document.body.classList.add("reveal");
+    host.addEventListener("animationend", done);
+    setTimeout(done, 1500);
+  }
+  async function recentCard(r) {
+    const card = document.createElement("button");
+    card.className = "rcard";
+    card.title = r.path || "";
+    card.setAttribute("spellcheck", "false");
+    let head = "";
+    if (native && r.path) {
+      try {
+        const rr = await native.readHead(r.path);
+        if (rr.ok) head = rr.text;
+      } catch (e) {}
+    }
+    const lines = head
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/^---[\s\S]*?---\n/, "")
+      .split("\n")
+      .filter((l) => !/^\s*\|/.test(l) && !/^\s*(---|```)/.test(l))
+      .map((l) => l.replace(/^#+\s*|[*_`>]/g, "").trim())
+      .filter(Boolean);
+    const title = (r.label || r.name).replace(/\.(md|markdown|txt)$/i, "");
+    card.innerHTML = '<div class="thumb"><b></b><p></p></div><div class="meta"><div class="n"></div><div class="d"></div></div>';
+    card.querySelector(".thumb b").textContent = lines[0] || title;
+    card.querySelector(".thumb p").textContent = lines.slice(1, 7).join(" ").slice(0, 320);
+    card.querySelector(".n").textContent = title;
+    card.querySelector(".d").textContent = relTime(r.at);
+    card.addEventListener("click", async () => {
+      if (r.path || r.handle) {
+        revealFromHome();
+        try {
+          await openFromRef(r.path ? { path: r.path } : { handle: r.handle });
+        } catch (e) {
+          message("Could not reopen: " + e.message, "err");
+        }
+      }
+    });
+    // the card is a button, so its remove button sits beside it in a wrapper
+    const wrap = document.createElement("div");
+    wrap.className = "rcard-wrap";
+    wrap.dataset.key = r.name;
+    const x = document.createElement("button");
+    x.className = "rcard-x";
+    x.title = "Remove from Recent";
+    x.setAttribute("aria-label", "Remove " + title + " from Recent");
+    x.innerHTML = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>';
+    x.addEventListener("click", () => forgetRecent(r, wrap));
+    wrap.append(card, x);
+    return wrap;
+  }
+  // Takes a document off Recent (Home and Open Recent). The file itself is never touched. Unless a tab has it open,
+  // Edith also stops being able to read it until it is opened again (see forget-file in main.js).
+  async function forgetRecent(r, wrap) {
+    if (wrap.dataset.gone) return;
+    wrap.dataset.gone = "1";
+    const grid = $("startRecent");
+    const cards = [...grid.children];
+    const i = cards.indexOf(wrap);
+    try {
+      await idb("recent", "readwrite", (st) => st.delete(r.name));
+    } catch (e) {}
+    pushRecentToMenu();
+    if (native && native.forgetFile && r.path && !tabs.some((t) => t.fileRef && t.fileRef.path === r.path)) native.forgetFile(r.path);
+    const focusNext = wrap.contains(document.activeElement);
+    // fade and shrink the card, then slide the others into its place
+    const before = new Map(cards.map((c) => [c, c.getBoundingClientRect()]));
+    if (!reduceMotion())
+      await wrap.animate(
+        [
+          { opacity: 1, transform: "none" },
+          { opacity: 0, transform: "scale(.92)" },
+        ],
+        { duration: 180, easing: "ease-in" },
+      ).finished;
+    wrap.remove();
+    const shown = new Set([...grid.children].map((c) => c.dataset.key));
+    const extra = (await listRecent()).slice(0, RECENT_CARDS).find((x) => !shown.has(x.name));
+    if (extra) grid.appendChild(await recentCard(extra));
+    if (!reduceMotion())
+      [...grid.children].forEach((c) => {
+        const a = before.get(c);
+        if (!a) return c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
+        const z = c.getBoundingClientRect();
+        if (a.left !== z.left || a.top !== z.top)
+          c.animate([{ transform: "translate(" + (a.left - z.left) + "px," + (a.top - z.top) + "px)" }, { transform: "none" }], {
+            duration: 180,
+            easing: "ease-out",
+          });
+      });
+    $("startRecentHead").hidden = !grid.children.length;
+    if (focusNext) {
+      const next = grid.children[Math.min(i, grid.children.length - 1)];
+      (next ? next.querySelector(".rcard") : $("startNew")).focus();
+    }
+  }
   let homeShown = false;
   async function showStart() {
     homeShown = true;
@@ -552,42 +659,7 @@
     const b = $("startRecent");
     b.innerHTML = "";
     $("startRecentHead").hidden = !rs.length;
-    for (const r of rs.slice(0, 6)) {
-      const card = document.createElement("button");
-      card.className = "rcard";
-      card.title = r.path || "";
-      card.setAttribute("spellcheck", "false");
-      let head = "";
-      if (native && r.path) {
-        try {
-          const rr = await native.readHead(r.path);
-          if (rr.ok) head = rr.text;
-        } catch (e) {}
-      }
-      const lines = head
-        .replace(/<!--[\s\S]*?-->/g, "")
-        .replace(/^---[\s\S]*?---\n/, "")
-        .split("\n")
-        .filter((l) => !/^\s*\|/.test(l) && !/^\s*(---|```)/.test(l))
-        .map((l) => l.replace(/^#+\s*|[*_`>]/g, "").trim())
-        .filter(Boolean);
-      const title = (r.label || r.name).replace(/\.(md|markdown|txt)$/i, "");
-      card.innerHTML = '<div class="thumb"><b></b><p></p></div><div class="meta"><div class="n"></div><div class="d"></div></div>';
-      card.querySelector(".thumb b").textContent = lines[0] || title;
-      card.querySelector(".thumb p").textContent = lines.slice(1, 7).join(" ").slice(0, 320);
-      card.querySelector(".n").textContent = title;
-      card.querySelector(".d").textContent = relTime(r.at);
-      card.addEventListener("click", async () => {
-        if (r.path || r.handle) {
-          try {
-            await openFromRef(r.path ? { path: r.path } : { handle: r.handle });
-          } catch (e) {
-            message("Could not reopen: " + e.message, "err");
-          }
-        }
-      });
-      b.appendChild(card);
-    }
+    for (const r of rs.slice(0, RECENT_CARDS)) b.appendChild(await recentCard(r));
     saveSession();
   }
   function hideStart() {
@@ -1004,10 +1076,14 @@
     prefs.size = Math.max(10, Math.min(32, px));
     savePrefs();
     keepPosition(() => document.documentElement.style.setProperty("--doc-size", prefs.size + "px"));
-    $("btnZoom").textContent = Math.round((prefs.size / BASE_SIZE) * 100) + "%";
-    $("zoomVal").textContent = $("btnZoom").textContent;
-    document.querySelectorAll("[data-zoom]").forEach((b) => b.classList.toggle("on", Math.round((BASE_SIZE * b.dataset.zoom) / 100) === prefs.size));
-    if ($("pSizeOut")) $("pSizeOut").textContent = Math.round((prefs.size / BASE_SIZE) * 100) + "%";
+    // a preset shows its own number (115% is 18px, which would otherwise read 113%)
+    const presets = [...document.querySelectorAll("[data-zoom]")];
+    presets.forEach((b) => b.classList.toggle("on", Math.round((BASE_SIZE * b.dataset.zoom) / 100) === prefs.size));
+    const on = presets.find((b) => b.classList.contains("on"));
+    const pct = (on ? on.dataset.zoom : Math.round((prefs.size / BASE_SIZE) * 100)) + "%";
+    $("btnZoom").textContent = pct;
+    $("zoomVal").textContent = pct;
+    if ($("pSizeOut")) $("pSizeOut").textContent = pct;
   }
   bindMenu("btnZoom", "zoomMenu");
   $("zoomMenu").addEventListener("click", (e) => {
@@ -3924,7 +4000,9 @@
   function setMode(m) {
     const a = captureAnchor(),
       el = T.el,
-      swap = T.editor.isMarkdownMode() !== (m === "markdown");
+      swap = T.editor.isMarkdownMode() !== (m === "markdown"),
+      // the Markdown editor's own text is free to read; asking Write mode for it converts the whole document again
+      md = T.editor.isMarkdownMode() ? T.editor.getMarkdown() : undefined;
     // Hide the editor while it re-lays itself out, so the reader never sees it at the wrong scroll position or half-rendered.
     if (swap) {
       el.classList.remove("mode-swap-in");
@@ -3935,7 +4013,7 @@
     prefs.mode = m;
     savePrefs();
     applyModeUI();
-    buildOutline();
+    buildOutline(md);
     setTimeout(() => {
       ensureMdGutter();
       applySpell();
@@ -4122,7 +4200,7 @@
     $("pSpell").checked = prefs.spell;
     $("pMode").value = prefs.mode;
     $("pSize").value = prefs.size;
-    $("pSizeOut").textContent = Math.round((prefs.size / BASE_SIZE) * 100) + "%";
+    $("pSizeOut").textContent = $("btnZoom").textContent;
     const ts = $("pTheme");
     ts.innerHTML = "";
     THEMES.forEach((t) => {
@@ -4549,10 +4627,25 @@
       await native.seedAllowed(list.filter((p) => typeof p === "string" && p.charAt(0) === "/"));
     } catch (e) {}
   }
+  // A theme's fonts are bundled but only decoded on first use, so the first switch to a theme drew the page in a
+  // fallback font and then reflowed it. Once the window is idle after startup, load every face, one per idle moment.
+  function preloadFonts() {
+    const idle = window.requestIdleCallback || ((f) => setTimeout(f, 50));
+    const faces = [...document.fonts].filter((f) => f.status === "unloaded");
+    const next = () => {
+      const f = faces.shift();
+      if (f)
+        f.load()
+          .catch(() => {})
+          .then(() => idle(next));
+    };
+    idle(next);
+  }
   seedAllowedFiles()
     .then(restoreSession)
     .then(() => {
       fitToolbar();
       pushRecentToMenu();
+      setTimeout(preloadFonts, 1500);
     });
 })();

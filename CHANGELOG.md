@@ -1,3 +1,13 @@
+## 3.7.4
+- Remove a document from Recent: hover over its card on Home (or move to it with Tab) and click the **×**. It also leaves File → Open Recent. The file itself is not touched.
+- Opening a recent document from Home now fades the page in, briefly. With Reduce Motion on, it appears at once.
+- Switching from Markdown back to Write is faster on long documents, up to about three times faster on very long ones.
+- The first switch to each theme no longer makes the page jump. Edith now loads every theme's fonts in the background after it starts.
+- Fixed: tabs showed no highlight when you pointed at them, especially on Home. They do now, in every theme.
+- Fixed: in a window of the usual size, **Wide** and **Full window** page widths looked the same. **Wide** now sits between Comfortable and Full window.
+- Fixed: choosing a text size such as 115% showed 113% in the status bar. It now shows the size you chose.
+- The download no longer includes the brand sheet (Edith Brand.md). It stays with the source code on GitHub.
+
 ## 3.7.3
 - Edith is now free and open source, under the MIT license. The code is on GitHub.
 - New: Help → **Report a Problem…** opens a bug report with your Edith and macOS versions filled in.

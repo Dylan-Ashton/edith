@@ -2,7 +2,7 @@
 
 The same steps every time.
 
-1. Unzip the download. You get a folder with **Edith.app**, **Install Edith.command**, this file, and **Edith Brand.md**. (Updating? Same steps; the installer replaces the old copy and keeps your settings, history and open tabs.)
+1. Unzip the download. You get a folder with **Edith.app**, **Install Edith.command** and this file. (Updating? Same steps; the installer replaces the old copy and keeps your settings, history and open tabs.)
 2. Double-click **Install Edith.command**.
    - If macOS says it "cannot be opened" or "Apple could not verify…": click **Done**, open **System Settings → Privacy & Security**, scroll down, click **Open Anyway**, then double-click it again.
    - Or skip the warning: open **Terminal**, type `bash ` (with a space), drag the installer file into the Terminal window, press Return.

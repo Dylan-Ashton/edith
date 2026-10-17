@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('native', {
   setDocState: (s) => ipcRenderer.send('doc-state', s),
   setTheme: (id) => ipcRenderer.send('set-theme', id),
   setRecent: (list) => ipcRenderer.send('recent', list),
+  forgetFile: (p) => ipcRenderer.send('forget-file', p),
   readClipboard: () => ipcRenderer.invoke('read-clipboard'),
   paths: () => cachedPaths,
   showInFolder: (p) => ipcRenderer.send('show-in-folder', p),

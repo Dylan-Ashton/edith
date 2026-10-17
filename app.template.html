@@ -20,7 +20,7 @@
     --ui-font: "IBM Plex Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
     --mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
     --doc-font: "IBM Plex Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
-    --doc-size: 16px; --doc-lh: 1.65; --doc-width: 82ch;
+    --doc-size: 16px; --doc-lh: 1.65; --doc-measure: 82ch; --doc-width: var(--doc-measure);
     --radius: 8px; --glow: none;
     --side: 260px; --mdsplit: 50%;
   }
@@ -51,14 +51,14 @@
     --accent: #7a2e2e; --accent-soft: #f0e0e0; --warn: #8a5a1a; --note: #f6e3a6; --note-ink: #4a3a00;
     --code-bg: #efede4; --sel: #e6d4cf;
     --ui-font: "Source Sans 3", -apple-system, sans-serif; --doc-font: "EB Garamond", Garamond, Georgia, serif;
-    --doc-size: 18px; --doc-lh: 1.6; --doc-width: 76ch; --radius: 3px;
+    --doc-size: 18px; --doc-lh: 1.6; --doc-measure: 76ch; --radius: 3px;
   }
   [data-theme="focused"] {
     --bg: #2a2a2a; --surface: #303030; --surface-2: #363636; --line: #444;
     --ink: #d8d8d8; --ink-2: #9a9a9a; --ink-3: #666;
     --accent: #bdbdbd; --accent-soft: #3f3f3f; --accent-ink: #1a1a1a; --warn: #c9a26a; --note: #4a4a3a; --note-ink: #e6dcb0;
     --code-bg: #262626; --sel: #4a4a4a;
-    --ui-font: "Inter", -apple-system, sans-serif; --doc-font: "Inter", -apple-system, sans-serif; --doc-lh: 1.8; --doc-width: 72ch; --radius: 6px;
+    --ui-font: "Inter", -apple-system, sans-serif; --doc-font: "Inter", -apple-system, sans-serif; --doc-lh: 1.8; --doc-measure: 72ch; --radius: 6px;
   }
   [data-theme="matrix"] {
     --bg: #000; --surface: #040804; --surface-2: #0a140a; --line: #0f3a14;
@@ -213,7 +213,8 @@
   .toastui-editor-ww-container .toastui-editor-contents { padding: 32px max(40px, calc((100% - var(--doc-width)) / 2)) 50vh !important; }
   .toastui-editor-md-preview .toastui-editor-contents { padding: 24px max(28px, calc((100% - var(--doc-width)) / 2)) 50vh !important; }
   .toastui-editor-defaultUI .toastui-editor-md-container .toastui-editor .ProseMirror { padding: 24px max(24px, calc((100% - var(--doc-width)) / 2)) 50vh !important; }
-  .work.w-wide { --doc-width: 110ch; } .work.w-full { --doc-width: 100%; }
+  /* Wide sits halfway between the theme's measure and the full window (capped at 110ch), so it always differs from both when the window has room */
+  .work.w-wide { --doc-width: min(calc((var(--doc-measure) + 100% - 80px) / 2), 110ch); } .work.w-full { --doc-width: 100%; }
   .toastui-editor-contents p { color: var(--ink) !important; margin: 0 0 .8em !important; }
   .toastui-editor-ww-container .toastui-editor-contents p { margin: 0 0 .8em !important; }
   .toastui-editor-contents h1, .toastui-editor-contents h2, .toastui-editor-contents h3, .toastui-editor-contents h4, .toastui-editor-contents h5, .toastui-editor-contents h6 { color: var(--ink) !important; font-family: var(--doc-font); font-weight: 600 !important; line-height: 1.25 !important; margin: 1.5em 0 .5em !important; border: 0 !important; padding: 0 !important; }
@@ -308,7 +309,8 @@
     .menu:not([hidden]) { animation: fadeIn .14s ease-out; }
     .modal.on .card { animation: cardIn .18s ease-out; }
     .bubble:not([hidden]) { animation: fadeIn .12s ease-out; }
-    .tab { transition: background .15s ease, color .15s ease, transform .15s ease; }
+    .tab { transition: background .15s ease, color .15s ease, transform .15s ease, box-shadow .15s ease; }
+    .tab:not(.active):hover { transform: translateY(-1px); }
     .start:not([hidden]) .start-card { animation: cardIn .25s ease-out; }
   }
   .recent-row { display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
@@ -334,7 +336,7 @@
   .tab .x:hover { background: var(--line); color: var(--ink); }
   .tab.dirty:not(:hover) .x { opacity: 0; }
   .tab.dirty:hover .d { display: none; }
-  .tab:not(.active):hover { background: color-mix(in srgb, var(--ink) 7%, var(--surface-2)); color: var(--ink); transform: translateY(-1px); }
+  .tab:not(.active):hover { background: color-mix(in srgb, var(--ink) 7%, var(--surface-2)); color: var(--ink); }
   .tab.active { background: var(--surface); color: var(--ink); border-color: var(--line); }
   .tab.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--surface); }
   .tab.dragging { opacity: .5; }
@@ -365,7 +367,7 @@
   .start { position: absolute; inset: 0; z-index: 10; display: flex; align-items: flex-start; justify-content: center; overflow: auto; padding: 7vh 32px 40px; background: var(--surface); }
   .start-logo { display: block; margin: 0 auto 22px; border-radius: 27px; box-shadow: 0 12px 32px rgba(60,50,30,.18); }
   .recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
-  .rcard { text-align: left; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; transition: transform .12s, box-shadow .12s; }
+  .rcard { text-align: left; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
   .rcard:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(60,50,30,.12); border-color: var(--accent-soft); }
   .rcard .thumb { height: 118px; background: var(--surface-2); padding: 14px 14px 0; overflow: hidden; position: relative; }
   .rcard .thumb::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(transparent, var(--surface-2)); }
@@ -374,6 +376,21 @@
   .rcard .meta { padding: 10px 12px 11px; }
   .rcard .meta .n { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rcard .meta .d { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+  .rcard-wrap { position: relative; display: flex; flex-direction: column; }
+  .rcard-wrap > .rcard { flex: 1; }
+  .rcard-x { position: absolute; top: 7px; right: 7px; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--surface); color: var(--ink-2); border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(0,0,0,.12); opacity: 0; pointer-events: none; }
+  .rcard-x svg { width: 10px; height: 10px; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; fill: none; }
+  .rcard-wrap:hover .rcard-x, .rcard-wrap:focus-within .rcard-x { opacity: 1; pointer-events: auto; }
+  .rcard-x:hover { color: var(--ink); background: var(--surface-2); }
+  .rcard-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .rcard-wrap:hover .rcard-x { transform: translateY(-2px); }
+  @media (prefers-reduced-motion: no-preference) {
+    .rcard { transition: transform .12s, box-shadow .12s; }
+    .rcard-x { transition: opacity .12s, transform .12s; }
+    /* opening a recent document from Home: the editor fades in and rises a little as Home goes */
+    body.reveal:not(.home) .tabview:not([hidden]) { animation: docIn .18s cubic-bezier(.2, .7, .3, 1) both; }
+  }
+  @keyframes docIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   .start .hint { margin-top: 28px; }
   .start[hidden] { display: none !important; }
   body.home .tabview { visibility: hidden; }
@@ -426,6 +443,10 @@
   .menu button.on:hover { background: color-mix(in srgb, var(--accent) 22%, var(--accent-soft)); }
   .tab.active:hover { background: color-mix(in srgb, var(--ink) 3%, var(--surface)); }
   .tab:not(.active):hover { background: color-mix(in srgb, var(--ink) 12%, var(--surface-2)); }
+  /* the open tab stays joined to the toolbar, so its hover is an accent line along the top; on Home no tab is open, so every tab tints */
+  .tab.active:hover { box-shadow: inset 0 2px 0 color-mix(in srgb, var(--accent) 65%, transparent); }
+  body.home .tabstrip .tab.active:hover { background: color-mix(in srgb, var(--ink) 12%, var(--surface-2)); color: var(--ink); box-shadow: none; }
+  .tab-home.active:hover { background: color-mix(in srgb, var(--ink) 6%, var(--surface)); }
   .tb-btn.primary:hover { filter: brightness(1.12); box-shadow: 0 1px 6px rgba(0,0,0,.18); }
   .tb-btn.primary:active { filter: brightness(.94); }
   .tb-btn:active:not(.primary) { background: var(--line); }

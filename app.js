@@ -727,6 +727,7 @@
     return tab;
   }
   async function closeTab(tab) {
+    if (!tab) return false; // ⌘W on Home with no tabs open
     if (tab.dirty && !isScratch(tab)) {
       await flushTab(tab);
       if (tab.dirty) {

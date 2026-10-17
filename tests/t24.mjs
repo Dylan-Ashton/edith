@@ -37,5 +37,9 @@ for (const words of [1000, 14000, 50000]) {
   console.log(`  ${count}: Write -> Markdown ${toMd} ms, ${toMd2} ms; Markdown -> Write ${toWw} ms`);
   ok(`${words}: closing right after a switch leaves nothing running`, errs.length === 0);
 }
+// ⌘W with every tab closed does nothing
+for (let i = 0; i < 5 && (await p.locator('.tab').count()); i++) { await p.keyboard.press('Meta+W'); await p.waitForTimeout(400); }
+await p.keyboard.press('Meta+W'); await p.waitForTimeout(300);
+ok('⌘W with no tabs open is ignored', (await p.locator('.tab').count()) === 0 && errs.length === 0);
 ok('no page errors', errs.length === 0); if (errs.length) console.log(errs);
 await b.close();

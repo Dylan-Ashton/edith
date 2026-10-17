@@ -376,6 +376,15 @@
   .rcard .meta { padding: 10px 12px 11px; }
   .rcard .meta .n { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rcard .meta .d { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+  .rcard-wrap { position: relative; display: flex; flex-direction: column; }
+  .rcard-wrap > .rcard { flex: 1; }
+  .rcard-x { position: absolute; top: 7px; right: 7px; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--surface); color: var(--ink-2); border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(0,0,0,.12); opacity: 0; pointer-events: none; }
+  .rcard-x svg { width: 10px; height: 10px; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; fill: none; }
+  .rcard-wrap:hover .rcard-x, .rcard-wrap:focus-within .rcard-x { opacity: 1; pointer-events: auto; }
+  .rcard-x:hover { color: var(--ink); background: var(--surface-2); }
+  .rcard-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .rcard-wrap:hover .rcard-x { transform: translateY(-2px); }
+  @media (prefers-reduced-motion: no-preference) { .rcard-x { transition: opacity .12s, transform .12s; } }
   .start .hint { margin-top: 28px; }
   .start[hidden] { display: none !important; }
   body.home .tabview { visibility: hidden; }

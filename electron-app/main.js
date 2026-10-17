@@ -493,6 +493,14 @@ ipcMain.handle("paths", () => ({ userData: app.getPath("userData"), documents: a
 ipcMain.on("show-in-folder", (e, p) => {
   if (canUseFile(p)) shell.showItemInFolder(norm(p));
 });
+// Removed from Recent on Home, and not open in a tab: the page gives the file up until the user opens it again.
+// This can only take access away.
+ipcMain.on("forget-file", (e, p) => {
+  const r = norm(p);
+  if (!r) return;
+  loadAllowed();
+  if (allowed.delete(r)) saveAllowed();
+});
 // A file dropped on the window: the preload resolves its path with webUtils.getPathForFile, which only
 // returns a path for a real file the user dragged in, so the page cannot invent one.
 ipcMain.on("grant-dropped", (e, p) => grant(p));

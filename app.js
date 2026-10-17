@@ -520,6 +520,99 @@
       await saveFile(false, true);
     }
   }
+  const RECENT_CARDS = 6;
+  async function recentCard(r) {
+    const card = document.createElement("button");
+    card.className = "rcard";
+    card.title = r.path || "";
+    card.setAttribute("spellcheck", "false");
+    let head = "";
+    if (native && r.path) {
+      try {
+        const rr = await native.readHead(r.path);
+        if (rr.ok) head = rr.text;
+      } catch (e) {}
+    }
+    const lines = head
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/^---[\s\S]*?---\n/, "")
+      .split("\n")
+      .filter((l) => !/^\s*\|/.test(l) && !/^\s*(---|```)/.test(l))
+      .map((l) => l.replace(/^#+\s*|[*_`>]/g, "").trim())
+      .filter(Boolean);
+    const title = (r.label || r.name).replace(/\.(md|markdown|txt)$/i, "");
+    card.innerHTML = '<div class="thumb"><b></b><p></p></div><div class="meta"><div class="n"></div><div class="d"></div></div>';
+    card.querySelector(".thumb b").textContent = lines[0] || title;
+    card.querySelector(".thumb p").textContent = lines.slice(1, 7).join(" ").slice(0, 320);
+    card.querySelector(".n").textContent = title;
+    card.querySelector(".d").textContent = relTime(r.at);
+    card.addEventListener("click", async () => {
+      if (r.path || r.handle) {
+        try {
+          await openFromRef(r.path ? { path: r.path } : { handle: r.handle });
+        } catch (e) {
+          message("Could not reopen: " + e.message, "err");
+        }
+      }
+    });
+    // the card is a button, so its remove button sits beside it in a wrapper
+    const wrap = document.createElement("div");
+    wrap.className = "rcard-wrap";
+    wrap.dataset.key = r.name;
+    const x = document.createElement("button");
+    x.className = "rcard-x";
+    x.title = "Remove from Recent";
+    x.setAttribute("aria-label", "Remove " + title + " from Recent");
+    x.innerHTML = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>';
+    x.addEventListener("click", () => forgetRecent(r, wrap));
+    wrap.append(card, x);
+    return wrap;
+  }
+  // Takes a document off Recent (Home and Open Recent). The file itself is never touched. Unless a tab has it open,
+  // Edith also stops being able to read it until it is opened again (see forget-file in main.js).
+  async function forgetRecent(r, wrap) {
+    if (wrap.dataset.gone) return;
+    wrap.dataset.gone = "1";
+    const grid = $("startRecent");
+    const cards = [...grid.children];
+    const i = cards.indexOf(wrap);
+    try {
+      await idb("recent", "readwrite", (st) => st.delete(r.name));
+    } catch (e) {}
+    pushRecentToMenu();
+    if (native && native.forgetFile && r.path && !tabs.some((t) => t.fileRef && t.fileRef.path === r.path)) native.forgetFile(r.path);
+    const focusNext = wrap.contains(document.activeElement);
+    // fade and shrink the card, then slide the others into its place
+    const before = new Map(cards.map((c) => [c, c.getBoundingClientRect()]));
+    if (!reduceMotion())
+      await wrap.animate(
+        [
+          { opacity: 1, transform: "none" },
+          { opacity: 0, transform: "scale(.92)" },
+        ],
+        { duration: 180, easing: "ease-in" },
+      ).finished;
+    wrap.remove();
+    const shown = new Set([...grid.children].map((c) => c.dataset.key));
+    const extra = (await listRecent()).slice(0, RECENT_CARDS).find((x) => !shown.has(x.name));
+    if (extra) grid.appendChild(await recentCard(extra));
+    if (!reduceMotion())
+      [...grid.children].forEach((c) => {
+        const a = before.get(c);
+        if (!a) return c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
+        const z = c.getBoundingClientRect();
+        if (a.left !== z.left || a.top !== z.top)
+          c.animate([{ transform: "translate(" + (a.left - z.left) + "px," + (a.top - z.top) + "px)" }, { transform: "none" }], {
+            duration: 180,
+            easing: "ease-out",
+          });
+      });
+    $("startRecentHead").hidden = !grid.children.length;
+    if (focusNext) {
+      const next = grid.children[Math.min(i, grid.children.length - 1)];
+      (next ? next.querySelector(".rcard") : $("startNew")).focus();
+    }
+  }
   let homeShown = false;
   async function showStart() {
     homeShown = true;
@@ -552,42 +645,7 @@
     const b = $("startRecent");
     b.innerHTML = "";
     $("startRecentHead").hidden = !rs.length;
-    for (const r of rs.slice(0, 6)) {
-      const card = document.createElement("button");
-      card.className = "rcard";
-      card.title = r.path || "";
-      card.setAttribute("spellcheck", "false");
-      let head = "";
-      if (native && r.path) {
-        try {
-          const rr = await native.readHead(r.path);
-          if (rr.ok) head = rr.text;
-        } catch (e) {}
-      }
-      const lines = head
-        .replace(/<!--[\s\S]*?-->/g, "")
-        .replace(/^---[\s\S]*?---\n/, "")
-        .split("\n")
-        .filter((l) => !/^\s*\|/.test(l) && !/^\s*(---|```)/.test(l))
-        .map((l) => l.replace(/^#+\s*|[*_`>]/g, "").trim())
-        .filter(Boolean);
-      const title = (r.label || r.name).replace(/\.(md|markdown|txt)$/i, "");
-      card.innerHTML = '<div class="thumb"><b></b><p></p></div><div class="meta"><div class="n"></div><div class="d"></div></div>';
-      card.querySelector(".thumb b").textContent = lines[0] || title;
-      card.querySelector(".thumb p").textContent = lines.slice(1, 7).join(" ").slice(0, 320);
-      card.querySelector(".n").textContent = title;
-      card.querySelector(".d").textContent = relTime(r.at);
-      card.addEventListener("click", async () => {
-        if (r.path || r.handle) {
-          try {
-            await openFromRef(r.path ? { path: r.path } : { handle: r.handle });
-          } catch (e) {
-            message("Could not reopen: " + e.message, "err");
-          }
-        }
-      });
-      b.appendChild(card);
-    }
+    for (const r of rs.slice(0, RECENT_CARDS)) b.appendChild(await recentCard(r));
     saveSession();
   }
   function hideStart() {

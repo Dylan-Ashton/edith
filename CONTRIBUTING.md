@@ -45,7 +45,7 @@ Rerun every test, both suites, after touching Toast UI, Electron or pdf.js.
 | `extend.plist` | Document types, minimum macOS and copyright, merged into the app's Info.plist |
 | `fonts/` | Which Fontsource stylesheets are bundled (`fonts.list`) and their licenses |
 | `installer/` | `Install Edith.command` and `READ ME FIRST.md`, zipped with the app by the release workflow |
-| `docs/` | The website (GitHub Pages from `main` → `/docs`) |
+| `docs/` | The website. `.github/workflows/pages.yml` publishes it on every push to `main`, with the app page as a try-it demo at `demo/` (`scripts/site.sh`, which marks it `<html data-demo>` to show the demo bar). Pages must be set to deploy from GitHub Actions; until then the workflow only builds |
 | `brand/` | Icon source (`boat.py`) and `edith.icns`; the brand sheet (colours, type, voice) is [`Edith Brand.md`](Edith%20Brand.md), kept in the repository and not shipped in the download |
 
 `app.js` section order: prefs → helpers → IndexedDB → tabs (each tab owns a Toast UI Editor; `T` is the active tab; `flushTab` settles timers before switching; `homeShown`) → document text and notes → change tracking and autosave (debounce scales with size) → stats and zoom → outline → find → notes and decorations → typing shortcuts, smart paste, scroll-sync snap → history and diff → load, save, import, export → toolbar and overflow → find bar → layout, themes, prefs → keyboard (capture phase) → startup and session restore.

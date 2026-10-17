@@ -46,7 +46,7 @@ Rerun every test, both suites, after touching Toast UI, Electron or pdf.js.
 | `fonts/` | Which Fontsource stylesheets are bundled (`fonts.list`) and their licenses |
 | `installer/` | `Install Edith.command` and `READ ME FIRST.md`, zipped with the app by the release workflow |
 | `docs/` | The website (GitHub Pages from `main` → `/docs`) |
-| `brand/` | Icon source (`boat.py`) and `edith.icns`; the brand sheet is `Edith Brand.md` |
+| `brand/` | Icon source (`boat.py`) and `edith.icns`; the brand sheet (colours, type, voice) is [`Edith Brand.md`](Edith%20Brand.md), kept in the repository and not shipped in the download |
 
 `app.js` section order: prefs → helpers → IndexedDB → tabs (each tab owns a Toast UI Editor; `T` is the active tab; `flushTab` settles timers before switching; `homeShown`) → document text and notes → change tracking and autosave (debounce scales with size) → stats and zoom → outline → find → notes and decorations → typing shortcuts, smart paste, scroll-sync snap → history and diff → load, save, import, export → toolbar and overflow → find bar → layout, themes, prefs → keyboard (capture phase) → startup and session restore.
 
@@ -93,7 +93,7 @@ People open their own files in Edith, including HTML, Word and PDF from anywhere
 
 1. On a branch: bump the version in `package.json` (`version` and `--app-version` in the `package` script), `electron-app/package.json`, `APP_VERSION` in `app.js`, and the version text in `docs/index.html` (hero, download card, JSON-LD). Add a `CHANGELOG.md` entry written for users (it is shown in the app under What's new).
 2. Merge the pull request.
-3. Publish a GitHub release with a **new** tag `vX.Y.Z` targeting `main`. The tag push runs `.github/workflows/release.yml` on a macOS 14 (Apple Silicon) runner: `npm ci`, `npm run package`, check and zip `Edith.app` with the installer files (`scripts/mac-zip.sh`, shared with the PR build), attach `Edith (Apple Silicon).zip` to the release. It takes 5–10 minutes.
+3. Publish a GitHub release with a **new** tag `vX.Y.Z` targeting `main`. The tag push runs `.github/workflows/release.yml` on a macOS 14 (Apple Silicon) runner: `npm ci`, `npm run package`, check and zip `Edith.app` with the installer files, `Install Edith.command` and `READ ME FIRST.md` (`scripts/mac-zip.sh`, shared with the PR build; `scripts/check-mac-zip.sh` fails if the brand sheet gets in), attach `Edith (Apple Silicon).zip` to the release. It takes 5–10 minutes.
    - Re-publishing a release on an existing tag does not trigger a build; use a new tag.
    - The workflow can also be run by hand (Actions → Build Edith → Run workflow); the zip then appears as an `edith-mac` artifact on the run, not on a release.
    - Packaging only works on a Mac; don't try it on Linux.

@@ -4,7 +4,8 @@
 #   scripts/check-mac-zip.sh some.zip --report-only                    print results, never fail (diagnostics)
 # Checks: unzip -t (CRCs), ditto -x -k, bsdtar (libarchive), and Archive Utility itself (what a double-click runs),
 # also on a copy marked as downloaded (com.apple.quarantine).
-# After each extraction: Edith.app is there, its binary and the installer are executable, codesign -dv reads it.
+# After each extraction: Edith.app is there, its binary and the installer are executable, codesign -dv reads it,
+# and the brand sheet (Edith Brand.md) is not in it.
 # macOS only.
 set -uo pipefail
 ZIP="$1"; MODE="${2:-}"
@@ -25,6 +26,8 @@ check_tree() { # $1 = how it was extracted, $2 = folder that should contain Edit
   [ -x "$app/Contents/MacOS/Edith" ] && pass "$how: app binary is executable" || fail "$how: app binary is not executable"
   [ -x "$dir/Install Edith.command" ] && pass "$how: installer is executable" || fail "$how: Install Edith.command is missing or not executable"
   [ -f "$dir/READ ME FIRST.md" ] && pass "$how: READ ME FIRST.md is there" || fail "$how: READ ME FIRST.md is missing"
+  # the brand sheet is for contributors and stays in the repository (since 3.7.4)
+  [ ! -e "$dir/Edith Brand.md" ] && pass "$how: no brand sheet in the download" || fail "$how: Edith Brand.md should not be in the zip"
   if codesign -dv "$app" 2>"$dir/../codesign.txt"; then pass "$how: codesign -dv: $(grep -E '^(Signature|Identifier)=' "$dir/../codesign.txt" | tr '\n' ' ')"; else fail "$how: codesign -dv failed: $(tr '\n' ' ' < "$dir/../codesign.txt")"; fi
   # informational: the installer re-signs the copy it installs, so a stale bundle seal here is not fatal
   codesign --verify --deep --strict "$app" >/dev/null 2>&1 && echo "  (codesign --verify --deep --strict: valid)" || echo "  (codesign --verify --deep --strict: not valid; Install Edith.command re-signs the installed copy)"

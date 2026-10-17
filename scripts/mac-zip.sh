@@ -1,6 +1,6 @@
 #!/bin/bash
 # Checks the app built by `npm run package` and zips it the way a release ships it:
-# a folder "Edith (Apple Silicon)" with Edith.app, Install Edith.command, READ ME FIRST.md and Edith Brand.md
+# a folder "Edith (Apple Silicon)" with Edith.app, Install Edith.command and READ ME FIRST.md
 # -> out/Edith (Apple Silicon).zip. scripts/check-mac-zip.sh then checks that the zip opens.
 # Used by both .github/workflows/release.yml and the PR build in .github/workflows/test.yml. macOS only.
 set -euo pipefail
@@ -29,7 +29,7 @@ echo "Version: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' 
 NAME="Edith (Apple Silicon)"
 rm -rf out && mkdir -p "out/$NAME"
 ditto "$APP" "out/$NAME/Edith.app"
-cp "installer/Install Edith.command" "installer/READ ME FIRST.md" "Edith Brand.md" "out/$NAME/"
+cp "installer/Install Edith.command" "installer/READ ME FIRST.md" "out/$NAME/"
 chmod +x "out/$NAME/Install Edith.command"
 ditto -c -k --sequesterRsrc --keepParent "out/$NAME" "out/$NAME.zip"
 ls -l "out/$NAME.zip"

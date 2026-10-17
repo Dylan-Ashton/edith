@@ -3928,7 +3928,9 @@
   function setMode(m) {
     const a = captureAnchor(),
       el = T.el,
-      swap = T.editor.isMarkdownMode() !== (m === "markdown");
+      swap = T.editor.isMarkdownMode() !== (m === "markdown"),
+      // the Markdown editor's own text is free to read; asking Write mode for it converts the whole document again
+      md = T.editor.isMarkdownMode() ? T.editor.getMarkdown() : undefined;
     // Hide the editor while it re-lays itself out, so the reader never sees it at the wrong scroll position or half-rendered.
     if (swap) {
       el.classList.remove("mode-swap-in");
@@ -3939,7 +3941,7 @@
     prefs.mode = m;
     savePrefs();
     applyModeUI();
-    buildOutline();
+    buildOutline(md);
     setTimeout(() => {
       ensureMdGutter();
       applySpell();

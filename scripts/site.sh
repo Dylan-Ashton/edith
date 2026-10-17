@@ -1,11 +1,10 @@
 #!/bin/bash
 # Assembles the website into _site/ for GitHub Pages (.github/workflows/pages.yml): everything in docs/, plus the
-# app page as a try-it demo at demo/, marked <html data-demo> so it shows the "running in your browser" bar.
-# Run `npm run build` first. Works on Linux and macOS.
+# "Try it" editor (site/try.js, bundled with Toast UI into assets/try.js and assets/try.css). Run `npm ci` first.
+# Works on Linux and macOS.
 set -euo pipefail
-[ -f dist.html ] || { echo "No dist.html; run npm run build first" >&2; exit 1; }
-rm -rf _site && mkdir -p _site/demo
+rm -rf _site && mkdir -p _site
 cp -R docs/. _site/
-grep -q '^<html lang="en">$' dist.html || { echo "dist.html has no <html lang=\"en\"> line to mark" >&2; exit 1; }
-sed 's/^<html lang="en">$/<html lang="en" data-demo>/' dist.html > _site/demo/index.html
-echo "_site: $(du -sh _site | cut -f1), demo $(du -h _site/demo/index.html | cut -f1)"
+npx --no-install esbuild site/try.js --bundle --minify --format=iife --log-level=warning --outfile=_site/assets/try.js
+[ -s _site/assets/try.js ] && [ -s _site/assets/try.css ] || { echo "The try-it bundle was not built" >&2; exit 1; }
+echo "_site: $(du -sh _site | cut -f1); try.js $(du -h _site/assets/try.js | cut -f1), try.css $(du -h _site/assets/try.css | cut -f1)"
